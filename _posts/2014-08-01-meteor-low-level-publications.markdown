@@ -8,7 +8,7 @@ comments: true
 
 ## Motivation
 
-As increasing numbers of developers are discovering, [Meteor](https://www.meteor.com/) is an incredibly powerful, feature-rich platform with which to create web apps.  By obviating many of the traditional frustrations in rolling out a production app, like user authentication or synchronisation of data on client and server, Meteor makes it remarkably easy to progress from idea to prototype to fully-functional product in no time at all.  However, the developer can become dazzled by such power, and there's the danger that he or she can end up producing complex, multi-page applications without fully understanding one of the most fundamental components of the platform - the Pub/Sub framework.  This is certainly an accurate description of my personal history with Meteor, and a situation I have recently put right, as I describe below.
+As increasing numbers of developers are discovering, [Meteor](https://www.meteor.com/) is an incredibly powerful, feature-rich platform with which to create web apps.  By obviating many of the traditional frustrations involved in rolling out a production app, like user authentication or synchronisation of data on client and server, Meteor makes it remarkably easy to progress from idea to prototype to fully-functional product in no time at all.  However, the developer can become dazzled by such power, and there's the danger that he or she can end up producing complex, multi-page applications without fully understanding one of the most fundamental components of the platform - the Pub/Sub framework.  This is certainly an accurate description of my personal history with Meteor, and a situation I have recently put right, as I describe below.
 
 ## Meteor.publish
 
