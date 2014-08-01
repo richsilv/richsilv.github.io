@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Understanding the Low-Level Publications API in Meteor"
+title:  "Understanding Meteor's Low-Level Publications API"
 date:   2014-08-01 12:26:57
 categories: meteor
 comments: true
