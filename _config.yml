@@ -1,13 +1,41 @@
-# Site settings
-name: Neuron Mint Garden
-title: Try not to panic if this is interesting
-email: silverton.richard@googlemail.com
-description: "A series of musings on things, both tangible and intangible.  Long on potential, short on regularity and coherence."
-baseurl: ""
-url: "http://yourdomain.com"
+title:            Neuron Mint Garden
+description:      Observations on Meteor, running, the world, and anything else I can be bothered to write about.
+logo:             NMGLogo.png
+disqus_shortname: neuronmintgarden
+search:           true
+# Your site's domain goes here. When working locally use localhost server leave blank
+# PS. If you set this wrong stylesheets and scripts won't load and most links will break.
+# PPS. If you leave it blank for local testing home links won't work, they'll be fine for live domains though.
+url:              
 
-# Build settings
-markdown: kramdown
-permalinks: pretty
-pygments: true
+# Owner/author information
+owner:
+  name:           Richard Silverton
+  avatar:         rs.jpg
+  email:          silverton.richard@googlemail.com
+  # Social networking links used in footer. Update and remove as you like.
+  twitter:		https://twitter.com/richsilvo
+  facebook:		https://www.facebook.com/richard.silverton.5
+  github:		https://github.com/richsilv
+  linkedin:		https://www.linkedin.com/profile/view?id=15501651
+  # For Google Authorship https://plus.google.com/authorship
+  google_plus:    "https://plus.google.com/u/0/117608652502810550836"
 
+# Links to include in top navigation
+# For external links add external: true
+links:
+  - title: About
+    url: /about/
+  - title: Articles
+    url: /articles/
+  - title: Google
+    url: http://google.com
+    external: true
+
+# http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+timezone:    Europe/London
+pygments:    true
+markdown:    kramdown
+
+# https://github.com/mojombo/jekyll/wiki/Permalinks
+permalink:   /:categories/:title/

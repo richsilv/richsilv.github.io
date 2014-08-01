@@ -1,14 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Neuron Mint Garden</title>
-    <description>A series of musings on things, both tangible and intangible.  Long on potential, short on regularity and coherence.</description>
-    <link></link>
-    <atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
-    
-      <item>
-        <title>Understanding Low-Level Publications in Meteor</title>
-        <description>&lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+<title type="text">Neuron Mint Garden</title>
+<generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
+<link rel="self" type="application/atom+xml" href="/feed.xml" />
+<link rel="alternate" type="text/html" href="/" />
+<updated>2014-08-01T21:23:40+01:00</updated>
+<id>/</id>
+<author>
+  <name>Richard Silverton</name>
+  <uri>/</uri>
+  <email>silverton.richard@googlemail.com</email>
+</author>
+
+
+<entry>
+  <title type="html"><![CDATA[Understanding Low-Level Publications in Meteor]]></title>
+  <link rel="alternate" type="text/html" href="/meteor/meteor-low-level-publications/"/>
+  <id>/meteor/meteor-low-level-publications</id>
+  <published>2014-08-01T13:26:57+01:00</published>
+  <updated>2014-08-01T13:26:57+01:00</updated>
+  <author>
+    <name>Richard Silverton</name>
+    <uri></uri>
+    <email>silverton.richard@googlemail.com</email>
+  </author>
+  
+  <content type="html">
+    &lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;/h2&gt;
 
 &lt;p&gt;As increasing numbers of developers are discovering, &lt;a href=&quot;https://www.meteor.com/&quot;&gt;Meteor&lt;/a&gt; is an incredibly powerful, feature-rich platform with which to develop web apps.  By obviating many of the traditional frustrations in rolling out a production app, like authentication and synchronisation of data on client and server, Meteor makes it remarkably easy to progress from idea to prototype to fully-functional product.  However, the developer can become dazzled by such power, and there’s the danger that he or she can end up producing complex, multi-page applications without fully understanding one of the most fundamental components of the platform - the Pub/Sub framework.  This is certainly an accurate description of my personal history with Meteor, and a situation I have very recently put right.&lt;/p&gt;
 
@@ -16,7 +34,7 @@
 
 &lt;p&gt;The first remark I should make is that the canonical demonstration of Meteor’s low-level publish API not only exists, but it’s almost the first thing to appear in the official documentation.  I can only assume that this is part of the problem - the &lt;code&gt;counts-by-room&lt;/code&gt; example is relatively subtle and benefits from some understanding of &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; (the protocol developed by Meteor specifically for client-server communication) - which will probably leave many readers skipping over it on their first visit in their enthusiasm to get to the shiny stuff.  Which, it turns out, is a mistake, at least judging by the number of recent questions on SO which can be resolved with a good understanding of this example.&lt;/p&gt;
 
-&lt;h4 id=&quot;two-publication-patterns-within-a-single-method&quot;&gt;Two Publication Patterns within a single Method&lt;/h4&gt;
+&lt;h3 id=&quot;two-publication-patterns-within-a-single-method&quot;&gt;Two Publication Patterns within a single Method&lt;/h3&gt;
 
 &lt;p&gt;Anybody who has some familiarity with Meteor will be aware of the first of the available publication patterns, in which the publish function uses the familiar collection API to return a collection cursor.  Those with knowledge of &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; will also be aware that the cursor object itself cannot actually be communicated via this protocol, so returning a cursor is really a way of describing the documents (current and future) which the app designer wants to make available on the client.  Meteor’s internals then take care of the actual transmission of these objects via &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt;, as well as continuing to observe the cursor for changes and sending the &lt;code&gt;ready&lt;/code&gt; message after initial transmission, which is used by the &lt;code&gt;onReady&lt;/code&gt; callback and &lt;code&gt;ready&lt;/code&gt; methods on the client side, and further utilised in iron-router’s &lt;code&gt;wait&lt;/code&gt; method and &lt;code&gt;waitOn&lt;/code&gt; hooks.&lt;/p&gt;
 
@@ -25,29 +43,23 @@
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;TestData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;testdata&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
 &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;isServer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-
   &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;cursorPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TestData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{});&lt;/span&gt;
   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
 
   &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;startup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-
     &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setInterval&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
       &lt;span class=&quot;nx&quot;&gt;TestData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;insert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;number&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;floor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Math&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)});&lt;/span&gt;
     &lt;span class=&quot;p&quot;&gt;},&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
 &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;isClient&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-
   &lt;span class=&quot;nx&quot;&gt;Session&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;filter&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{});&lt;/span&gt;
 
   &lt;span class=&quot;nx&quot;&gt;Deps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;autorun&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;nx&quot;&gt;mySub&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;subscribe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;cursorPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Session&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;get&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;filter&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Note that the subscription on the client side is contained within a &lt;code&gt;Deps.autorun&lt;/code&gt; block and depends on a reactive &lt;code&gt;Session&lt;/code&gt; variable.  This means that we can change the subscription filter simply by changing the value of the session variable, and Meteor is clever enough to manage the resubscription (including doing nothing if the filter hasn’t actually changed).&lt;/p&gt;
@@ -67,12 +79,11 @@
   &lt;li&gt;A further &lt;code&gt;added&lt;/code&gt; message as the &lt;code&gt;setInterval&lt;/code&gt; block on the server runs again and adds a new document to the collection.  Meteor is automatically observing the cursor which was returned by the &lt;code&gt;Meteor.publish&lt;/code&gt; block and sending any changes to subscribing clients.  Note that the timestamp on this message is several seconds after the others, confirming that this was a document added after the connection had been made and the initial data synchronised.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h4 id=&quot;distributed-data-protocol&quot;&gt;Distributed Data Protocol&lt;/h4&gt;
+&lt;h3 id=&quot;distributed-data-protocol&quot;&gt;Distributed Data Protocol&lt;/h3&gt;
 
 &lt;p&gt;The second way to use the Pub/Sub model is really just an API to exactly this &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; flow from the server side, relating to a specific connection and subscription request.  What this means is that the &lt;code&gt;name&lt;/code&gt;d publication function will be run once for each incoming subscription on that &lt;code&gt;name&lt;/code&gt;, but rather than returning a cursor and leaving it for Meteor to generate the required &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; messages, it allows us to send customised &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; messages to suit the requirements of the application.  Here’s an example which does exactly the same as the one above:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ddpPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-
   &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
   &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;subHandle&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TestData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;observeChanges&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
@@ -92,7 +103,6 @@
   &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onStop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;nx&quot;&gt;subHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;stop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-
 &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;So what exactly are we doing here?&lt;/p&gt;
@@ -124,7 +134,6 @@
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;CollectionCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;collectioncount&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// NOTE THAT THIS ONLY NEEDS TO BE DECLARED ON THE CLIENT&lt;/span&gt;
 
 &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ddpPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// WHILST THIS IS OBVIOUSLY ON THE SERVER&lt;/span&gt;
-
   &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
       &lt;span class=&quot;nx&quot;&gt;ready&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
       &lt;span class=&quot;nx&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
@@ -146,13 +155,11 @@
   &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;added&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;collectioncount&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Random&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&amp;quot;testdata&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
 
   &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-
   &lt;span class=&quot;nx&quot;&gt;ready&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
   &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onStop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;nx&quot;&gt;subHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;stop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-
 &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;This publish function will also populate the &lt;code&gt;CollectionCount&lt;/code&gt; collection (which only needs to be constructed on the client) with an object that contains the number of documents in the existing set.  You can then delay mission critical logic on the client until &lt;code&gt;TestData.find().count() === CollectionCount.findOne({Collection: &quot;testdata&quot;}).Count&lt;/code&gt;.  Note that the actual logic will need to be slightly longer to account for the period in which &lt;code&gt;CollectionCount.findOne({Collection: &quot;testdata&quot;})&lt;/code&gt; returns nothing as the publish function hasn’t yet sent the corresponding message.&lt;/p&gt;
@@ -162,7 +169,6 @@
 &lt;p&gt;A similar scenario is one in which we don’t need to know the exact number of documents in the collection when we subscribe, but we do need to know which they are.  This can be solved as follows:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ddpPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-
   &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
       &lt;span class=&quot;nx&quot;&gt;ready&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
@@ -181,13 +187,11 @@
   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
 
   &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ready&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-
   &lt;span class=&quot;nx&quot;&gt;ready&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
   &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;onStop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
     &lt;span class=&quot;nx&quot;&gt;subHandle&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;stop&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-
 &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;Now if we query the collection on the client immediately after we’ve received the &lt;code&gt;ready&lt;/code&gt; message, we will notice that &lt;code&gt;TestData.find().count&lt;/code&gt; is equal to &lt;code&gt;TestData.find({existing: true}).count()&lt;/code&gt;.  However, once additional documents are added on the client side, this will cease to be the case as these will no longer have the &lt;code&gt;existing&lt;/code&gt; property, allowing us to identify that these are genuinely newly-added documents from a global perspective.&lt;/p&gt;
@@ -208,11 +212,9 @@
   &lt;li&gt;By default, a subscription that runs within a &lt;code&gt;Deps.autorun&lt;/code&gt; will not actually resubscribe if there is no effective change in the subscription request, even if the &lt;code&gt;autorun&lt;/code&gt; block is rerun.  I can’t imagine a scenario in which this behaviour would be undesirable, but if that’s ever the case you could force a resubscription by just including &lt;code&gt;mySub.stop()&lt;/code&gt; before the &lt;code&gt;Meteor.subscribe&lt;/code&gt; line in the &lt;code&gt;autorun&lt;/code&gt; block.&lt;/li&gt;
 &lt;/ul&gt;
 
-</description>
-        <pubDate>Fri, 01 Aug 2014 13:26:57 +0100</pubDate>
-        <link>/meteor/2014/08/01/meteor-low-level-publications.html</link>
-        <guid isPermaLink="true">/meteor/2014/08/01/meteor-low-level-publications.html</guid>
-      </item>
-    
-  </channel>
-</rss>
+
+    &lt;p&gt;&lt;a href=&quot;/meteor/meteor-low-level-publications/&quot;&gt;Understanding Low-Level Publications in Meteor&lt;/a&gt; was originally published by Richard Silverton at &lt;a href=&quot;&quot;&gt;Neuron Mint Garden&lt;/a&gt; on August 01, 2014.&lt;/p&gt;
+  </content>
+</entry>
+
+</feed>

@@ -1,11 +1,15 @@
 ---
 layout: page
-title: About
 permalink: /about/
+title: About this blog
+tags: [Meteor, running, London, Yorkshire]
+modified: 2014-08-01
+image:
+  feature: ilkleymoor.jpg
+  credit: James Whitesmith
+  creditlink: https://www.flickr.com/photos/jwhitesmith/
 ---
 
-My name is Richard Silverton and I'm a thirty-something technology and running enthusiast in London, although I was fortunate enough to have been born and raised in [God's own country](http://www.theguardian.com/travel/2013/sep/03/yorkshire).
+After years of expounding my ideas in places like pubs and football grounds, I've somewhat belatedly decided that a blog would be a better medium, not least because it's almost impossible to find a proxy for Javscript markdown in a beer garden.
 
-I'm at least ten years too late to be starting a blog, but I'm doing so anyway, partly in the hope that it becomes retro-fashionable at some juncture, a bit like vinyl or sailor tattoos.
-
-If you read anything interesting, useful or particularly repellent on here, please do let me know.  Of course, I make no promises regarding the likelihood of any of that happening.
+I'm in my 30s, I come from Yorkshire, I live in London, and I enjoy hacking (mostly in Meteor) and running (when I'm not injured).  There's more about me on [here](http://richsilv.typify.io/), or you could [follow me on Twitter](https://twitter.com/richsilvo) if you think you're capable of tolerating this sort of drivel in bite-sized pieces.

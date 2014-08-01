@@ -3,6 +3,7 @@ layout: post
 title:  "Understanding Low-Level Publications in Meteor"
 date:   2014-08-01 12:26:57
 categories: meteor
+comments: true
 ---
 
 ## Motivation
@@ -13,7 +14,7 @@ As increasing numbers of developers are discovering, [Meteor](https://www.meteor
 
 The first remark I should make is that the canonical demonstration of Meteor's low-level publish API not only exists, but it's almost the first thing to appear in the official documentation.  I can only assume that this is part of the problem - the `counts-by-room` example is relatively subtle and benefits from some understanding of [DDP][DDP] (the protocol developed by Meteor specifically for client-server communication) - which will probably leave many readers skipping over it on their first visit in their enthusiasm to get to the shiny stuff.  Which, it turns out, is a mistake, at least judging by the number of recent questions on SO which can be resolved with a good understanding of this example.
 
-#### Two Publication Patterns within a single Method
+### Two Publication Patterns within a single Method
 
 Anybody who has some familiarity with Meteor will be aware of the first of the available publication patterns, in which the publish function uses the familiar collection API to return a collection cursor.  Those with knowledge of [DDP][DDP] will also be aware that the cursor object itself cannot actually be communicated via this protocol, so returning a cursor is really a way of describing the documents (current and future) which the app designer wants to make available on the client.  Meteor's internals then take care of the actual transmission of these objects via [DDP][DDP], as well as continuing to observe the cursor for changes and sending the `ready` message after initial transmission, which is used by the `onReady` callback and `ready` methods on the client side, and further utilised in iron-router's `wait` method and `waitOn` hooks.
 
@@ -23,29 +24,23 @@ Here's the basic setup to which I'll be referring, which involves a test collect
 TestData = new Meteor.Collection('testdata');
 
 if (Meteor.isServer) {
-
   Meteor.publish('cursorPub', function(filter) {
     return TestData.find(filter || {});
   });
 
   Meteor.startup(function () {
-
     Meteor.setInterval(function() {
       TestData.insert({number: Math.floor(Math.random() * 1000)});
     }, 10000);
-
   });
-
 }
 
 if (Meteor.isClient) {
-
   Session.set('filter', {});
 
   Deps.autorun(function(c) {
     mySub = Meteor.subscribe('cursorPub', Session.get('filter'));
   });
-
 }  
 {% endhighlight %}
 
@@ -64,13 +59,12 @@ Reading from the bottom up, and ignoring messages relating to the `meteor_autoup
 5. A `ready` message sent by the server indicating that initial data on this subscription has all been sent - note that the `subs` field has the same id as the `subscribe` message which was sent by the client in step (2).
 6. A further `added` message as the `setInterval` block on the server runs again and adds a new document to the collection.  Meteor is automatically observing the cursor which was returned by the `Meteor.publish` block and sending any changes to subscribing clients.  Note that the timestamp on this message is several seconds after the others, confirming that this was a document added after the connection had been made and the initial data synchronised.
 
-#### Distributed Data Protocol
+### Distributed Data Protocol
 
 The second way to use the Pub/Sub model is really just an API to exactly this [DDP][DDP] flow from the server side, relating to a specific connection and subscription request.  What this means is that the `name`d publication function will be run once for each incoming subscription on that `name`, but rather than returning a cursor and leaving it for Meteor to generate the required [DDP][DDP] messages, it allows us to send customised [DDP][DDP] messages to suit the requirements of the application.  Here's an example which does exactly the same as the one above:
 
 {% highlight javascript %}
 Meteor.publish('ddpPub', function(filter) {
-
   var self = this;
 
   var subHandle = TestData.find(filter || {}).observeChanges({
@@ -90,7 +84,6 @@ Meteor.publish('ddpPub', function(filter) {
   self.onStop(function () {
     subHandle.stop();
   });
-
 });
 {% endhighlight %}
 
@@ -123,7 +116,6 @@ One way of confirming that the original document set had arrived intact would be
 CollectionCount = new Meteor.Collection('collectioncount'); // NOTE THAT THIS ONLY NEEDS TO BE DECLARED ON THE CLIENT
 
 Meteor.publish('ddpPub', function(filter) {  // WHILST THIS IS OBVIOUSLY ON THE SERVER
-
   var self = this,
       ready = false,
       count = 0;
@@ -145,15 +137,12 @@ Meteor.publish('ddpPub', function(filter) {  // WHILST THIS IS OBVIOUSLY ON THE 
   self.added("collectioncount", Random.id(), {Collection: "testdata", Count: count});
 
   self.ready();
-
   ready = true;
 
   self.onStop(function () {
     subHandle.stop();
   });
-
 });
-
 {% endhighlight %}
 
 This publish function will also populate the `CollectionCount` collection (which only needs to be constructed on the client) with an object that contains the number of documents in the existing set.  You can then delay mission critical logic on the client until `TestData.find().count() === CollectionCount.findOne({Collection: "testdata"}).Count`.  Note that the actual logic will need to be slightly longer to account for the period in which `CollectionCount.findOne({Collection: "testdata"})` returns nothing as the publish function hasn't yet sent the corresponding message.
@@ -165,7 +154,6 @@ A similar scenario is one in which we don't need to know the exact number of doc
 {% highlight javascript %}
 
 Meteor.publish('ddpPub', function(filter) {
-
   var self = this,
       ready = false;
 
@@ -184,13 +172,11 @@ Meteor.publish('ddpPub', function(filter) {
   });
 
   self.ready();
-
   ready = true;
 
   self.onStop(function () {
     subHandle.stop();
   });
-
 });
 
 {% endhighlight %}
