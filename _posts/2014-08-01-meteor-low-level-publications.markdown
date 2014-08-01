@@ -61,7 +61,7 @@ Reading from the bottom up, and ignoring messages relating to the `meteor_autoup
 
 ### Distributed Data Protocol
 
-The second way to use the Pub/Sub model is really just an API to exactly this [DDP][DDP] flow from the server side, relating to a specific connection and subscription request.  What this means is that the `name`d publication function will be run once for each incoming subscription on that `name`, but rather than returning a cursor and leaving it for Meteor to generate the required [DDP][DDP] messages, it allows us to send customised [DDP][DDP] messages to suit the requirements of the application.  Here's an example which does exactly the same as the one above:
+The second way to use the Pub/Sub model is really just an API to exactly this [DDP][DDP] flow from the server side, relating to a specific connection and subscription request.  What this means is that the named publication function will be run once for each incoming subscription on that name, but rather than returning a cursor and leaving it for Meteor to generate the required [DDP][DDP] messages, it allows us to send customised [DDP][DDP] messages to suit the requirements of the application.  Here's an example which does exactly the same as the one above:
 
 {% highlight javascript %}
 Meteor.publish('ddpPub', function(filter) {
@@ -105,7 +105,7 @@ At this stage, it would be reasonable to ask what the point of all this was, sin
 
 ### Existing Documents versus New Additions
 
-One question which is regularly asked on Stack Overflow and elsewhere relates to how the client can be sure it's local collection has been fully synchronised before attempting to work with it.  I would argue that the majority of cases can be resolved with sensible use of the `ready()` method, which is reactive and triggered by the DDP `ready` method we've seen above.  However, whilst I am no expert on websockets and stand to be corrected, I am certain that there are cases in which the order in which messages are sent from the server isn't necessarily the same as the order in which they're received by the client, at least if there is a degree of latency involved.  What this means is that the `ready` message would arrive before one or more documents.  Perhaps this is no problem, as Meteor's built-in reactivity will re-render everything as soon as the missing documents arrive and the client will barely even notice.  But what if even that outcome is unacceptable?
+One question which is regularly asked on Stack Overflow and elsewhere relates to how the client can be sure its local collection has been fully synchronised before attempting to work with it.  I would argue that the majority of cases can be resolved with sensible use of the `ready()` method, which is reactive and triggered by the DDP `ready` method we've seen above.  However, whilst I am no expert on websockets and stand to be corrected, I am certain that there are cases in which the order in which messages are sent from the server isn't necessarily the same as the order in which they're received by the client, at least if there is a degree of latency involved.  What this means is that the `ready` message would arrive before one or more documents.  Perhaps this is no problem, as Meteor's built-in reactivity will re-render everything as soon as the missing documents arrive and the client will barely even notice.  But what if even that outcome is unacceptable?
 
 #### Pattern 1: A Document Counter
 
