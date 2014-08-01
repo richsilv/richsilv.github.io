@@ -1,0 +1,13 @@
+# Site settings
+name: Neuron Mint Garden
+title: Try not to panic if this is interesting
+email: silverton.richard@googlemail.com
+description: "A series of musings on things, both tangible and intangible.  Long on potential, short on regularity and coherence."
+baseurl: ""
+url: "http://yourdomain.com"
+
+# Build settings
+markdown: kramdown
+permalinks: pretty
+pygments: true
+
