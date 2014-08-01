@@ -145,7 +145,7 @@ Meteor.publish('ddpPub', function(filter) {  // WHILST THIS IS OBVIOUSLY ON THE 
 });
 {% endhighlight %}
 
-This publish function will also populate the `CollectionCount` collection (which only needs to be constructed on the client) with an object that contains the number of documents in the existing set.  You can then delay mission critical logic on the client until `TestData.find().count() === CollectionCount.findOne({Collection: "testdata"}).Count`.  Note that the actual logic will need to be slightly longer to account for the period in which `CollectionCount.findOne({Collection: "testdata"})` returns nothing as the publish function hasn't yet sent the corresponding message.
+This publish function will also populate the `CollectionCount` collection (which only needs to be constructed on the client) with an object that contains the number of documents in the existing set.  You can then delay mission critical logic on the client until `TestData.find().count()` is equal to `CollectionCount.findOne({Collection: "testdata"}).Count`.  Note that the actual logic will need to be slightly more involved to account for the period in which `CollectionCount.findOne({Collection: "testdata"})` returns nothing as the publish function hasn't yet sent the corresponding message.
 
 #### Pattern 2: An Additional Field
 
