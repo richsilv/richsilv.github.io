@@ -14,7 +14,7 @@ Having committed to writing a blog about both [Meteor](http://meteor.com) *and* 
 * Apart from being a running enthusiast, there's no reason at all why I should have any idea what I'm talking about; I'm not a physio, coach, doctor or anybody else with vaguely relevant qualifications.
 * This is hugely self-indulgent, but hopefully cathartic.
 
-That said, my recent experience with heart-rate training, which may or may not have something to do with my current injury, may at least provides some material for discussion.  The question I'm trying to answer is: if a runner is going to commit to a heart rate training regime, do they actually need to **practise running slowly first**?
+That said, my recent experience with heart-rate training, which may or may not have something to do with my current injury, may at least provides some material for discussion.  The question I'm trying to answer is: **if a runner is going to commit to a heart rate training regime, do they actually need to practise running slowly first?**
 
 Honestly, it's not as easy as it sounds.
 
