@@ -38,7 +38,7 @@ Now I am not the world's greatest runner, or my city's greatest runner, or my cl
 
 ![Running Screenshot](/assets/runningshot.jpg)
 
-My shiny new toy provided some relatively encouraging statistics to back this up: a healthy cadence of around 185spm at tempo pace, ground contact time hovering just above 200ms (which, supposedly, is good) and vertical oscillation generally below 10cm (average, but not terrible).
+My shiny new toy provided some encouraging statistics to back this up: a healthy cadence of around 185spm at tempo pace, ground contact time hovering just above 200ms (which, supposedly, is good) and vertical oscillation generally below 10cm (average, but not terrible).
 
 ![Running Form - Good](/assets/runningformgood.png)
 
