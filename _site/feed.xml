@@ -4,7 +4,7 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="/feed.xml" />
 <link rel="alternate" type="text/html" href="/" />
-<updated>2014-08-01T21:23:40+01:00</updated>
+<updated>2014-08-20T16:10:31+01:00</updated>
 <id>/</id>
 <author>
   <name>Richard Silverton</name>
@@ -14,7 +14,83 @@
 
 
 <entry>
-  <title type="html"><![CDATA[Understanding Low-Level Publications in Meteor]]></title>
+  <title type="html"><![CDATA[The Biomechanics of Heart-Rate Training, or, "How Do I Run Slowly?"]]></title>
+  <link rel="alternate" type="text/html" href="/running/biomechanics-of-heart-rate-training/"/>
+  <id>/running/biomechanics-of-heart-rate-training</id>
+  <published>2014-08-20T12:52:57+01:00</published>
+  <updated>2014-08-20T12:52:57+01:00</updated>
+  <author>
+    <name>Richard Silverton</name>
+    <uri></uri>
+    <email>silverton.richard@googlemail.com</email>
+  </author>
+  
+  <content type="html">
+    &lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;/h2&gt;
+
+&lt;p&gt;Having committed to writing a blog about both &lt;a href=&quot;http://meteor.com&quot;&gt;Meteor&lt;/a&gt; &lt;em&gt;and&lt;/em&gt; running (and even chosen the blog title on that basis), I find myself compelled to produce a post about the latter, despite the fact that I’m unable to do very much of it at present. So, to begin, a disclaimer:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;I am currently injured, and as upset about it as any runner tends to be.&lt;/li&gt;
+  &lt;li&gt;Apart from being a running enthusiast, there’s no reason at all why I should have any idea what I’m talking about; I’m not a physio, coach, doctor or anybody else with vaguely relevant qualifications.&lt;/li&gt;
+  &lt;li&gt;This is hugely self-indulgent, but hopefully carthartic.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;That said, my recent experience with heart-rate training, which may or may not have something to do with my current injury, may at least provides some material for discussion.  The question I’m trying to answer is: if a runner is going to commit to a heart rate training regime, do they actually need to &lt;strong&gt;practice running slowly first&lt;/strong&gt;?&lt;/p&gt;
+
+&lt;p&gt;Honestly, it’s not as easy as it sounds.&lt;/p&gt;
+
+&lt;h2 id=&quot;heart-rate-training-the-principle&quot;&gt;Heart Rate Training: the Principle&lt;/h2&gt;
+
+&lt;p&gt;Without dwelling on the scientific and psychological rationale behind training with a heart rate monitor, which is amply discussed elsewhere, suffice to focus on the observation that, left to their own devices, athletes almost uniformly tend to perform easy sessions at too high an intensity and hard sessions at too low an intensity for optimal benefit - i.e. they &lt;a href=&quot;http://www.runnersworld.com/race-training/regression-to-medium-speed&quot;&gt;revert to the mean&lt;/a&gt;.  &lt;strong&gt;Heart rate monitoring&lt;/strong&gt; acts as an effective aid in this respect as it provides immediate feedback on the runner’s failure to remain at the targeted training intensity, often accompanied by an annoying beepy noise, which the runner in question will no doubt be incentivised to silence with their renewed compliance.&lt;/p&gt;
+
+&lt;p&gt;Thanks to regular Thursday sessions being dragged round Parliament Hill track by &lt;a href=&quot;https://twitter.com/thomascraggs&quot;&gt;Tom Craggs&lt;/a&gt; with the rest of the &lt;a href=&quot;https://twitter.com/ChasersLDN&quot;&gt;Mornington Chasers&lt;/a&gt;, the peer pressure required to run harder than I would usually contemplate alone was being applied with sufficient regularity to leave me confident that the hard days were genuinely just that, but I wasn’t sure the same could be said about easy days, which tended to be somewhat laissez-faire. With the Frankfurt marathon coming up in October and consequent necessity to increase weekly mileage, the prospect of applying a scientific approach to the easy runs seemed appealling.  As, frankly, did spending an unnecessary amount of money on a smart new running watch.&lt;/p&gt;
+
+&lt;h2 id=&quot;garmin-forerunner-620&quot;&gt;Garmin Forerunner 620&lt;/h2&gt;
+
+&lt;p&gt;If you’re looking for a good way to spend more than £250 and justify it by pretending that your running performance will be magically transformed, I can offer no better suggestion than the &lt;a href=&quot;https://buy.garmin.com/en-GB/GB/sports/running/forerunner-620/prod122785.html&quot;&gt;Garmin Forerunner 620&lt;/a&gt;.  Of course, it’s the training that makes you faster and the watch doesn’t necessarily have anything to do with it, but for those of us who want something on our wrists that looks smart &lt;em&gt;and&lt;/em&gt; tells us our vertical oscillation, this is the gadget we’ve been waiting for.  Heart Rate, Race time predictor, VO2 Max estimator, Recovery Advisor, Ground Contact Time and Cadence (more of that later) are all provided, along with the usual pace and distance data.&lt;/p&gt;
+
+&lt;h2 id=&quot;running-very-slowly-is-difficult&quot;&gt;Running very slowly is difficult&lt;/h2&gt;
+
+&lt;p&gt;I’ll leave out the details surrounding calibration, and cut to the chase: how does it feel to do as instructed and run in heart rate zone two?  For me, very, very slow, that’s how.  Any slight incline prompts a series of beeps from the watch, as does thirty seconds not spent actively concentrating on running slowly.  There are encouraging aspects to this observation: certainly, cycling at the same heart rate doesn’t feel anything like as comfortable, suggesting my physiology has adapted to running to at least some extent.  But the fact remains: running this slowly is genuinely difficult.&lt;/p&gt;
+
+&lt;h2 id=&quot;my-running-form-part-i&quot;&gt;My Running Form (Part I)&lt;/h2&gt;
+
+&lt;p&gt;Now I am not the world’s greatest runner, or my city’s greatest runner, or my club’s greatest runner.  The number of runners I would need to be among to represent the greatest would be really very small.  However, the gradual assimilation of advice from coaches and reputable running publications, along with quite a lot of practice, has at least left me with a running style which is pretty fluid and efficient, with a fore-foot strike, an upright posture and a relatively fast cadence (thanks, coach Craggs).  It’s not perfect, but it’s pretty solid:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/runningshot.jpg&quot; alt=&quot;Running Screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;My shiny new toy provided some relatively encouraging statistics to back this up: a healthy cadence of around 185spm at tempo pace, ground contact time hovering just above 200ms (which, supposedly, is good) and vertical oscillation generally below 10cm (average, but not terrible).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/runningformgood.png&quot; alt=&quot;Running Form - Good&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, all that was abandoned in spectacular fashion when I started to limit my heart-rate.&lt;/p&gt;
+
+&lt;h2 id=&quot;my-running-form-part-ii&quot;&gt;My Running Form (Part II)&lt;/h2&gt;
+
+&lt;p&gt;How does one reduce effort, and therefore heart rate, without compromising running form? To an extent, the strategy of reducing stride length and maintaining everything else seems logical, until one actually tries to do it.  Fairly quickly you end up replicating the sort of tip-toeing neuro-muscular warm-up exercise that’s ideal before a track session, but feels (and probably looks) ridiculous when you’re trying to run round the park and, crucially, doesn’t actually get your heart-rate into the designated zone.  It’s probably perfectly possible to run 8m30s miles at 180spm, but I don’t seem to be able to do it.&lt;/p&gt;
+
+&lt;p&gt;So, the cadence inevitably drops.  And drops.  And drops.  And I end up loping up and down in a fashion that feels ungainly and has the statistics to back it up: ground contact time way up, cadence way down and, most worryingly, vertical oscillation which the Garmin now classes as bright red (for which you should read “awful”).  Whether the received wisdom on the consequences of such a dramatic change in running form is correct or not, there is &lt;a href=&quot;http://www.runnersworld.com/running-tips/the-pros-and-cons-of-stride-variability&quot;&gt;strong evidence&lt;/a&gt; that it’s not a great idea.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/runningformbad.png&quot; alt=&quot;Running Form - Bad&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;During the three weeks over which I persevered with this regime, I grew to understand and appreciate the physiological rationale behind heart rate training: whilst self-assessment is no way to judge a training plan, there’s no doubt that I was consistently fresher and less fatigued than during previous periods of heavy-ish training, despite logging more miles per week (40-50 as opposed to 30-40).  Unfortunately, my lower legs also began to hurt in a way that they hadn’t for several years, with the pain in my left shin getting progressively worse until one long run left me struggling to walk down stairs the following day.  That was three weeks ago.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-big-question&quot;&gt;The Big Question&lt;/h2&gt;
+
+&lt;p&gt;As I suggested earlier, I’m currently injured - awaiting the results of an x-ray but comprehensively condemned to the pool and gym for the forseeable future either way.  It would be absurdly unscientific to link cause with effect on a sample size of one, particularly when it’s my own body,and even if the change in training was responsible, it was my own failure to adapt my running style sufficiently, which I’m sure must be possible, but it’s not clear how.  Nevertheless, it does make me wonder.&lt;/p&gt;
+
+&lt;p&gt;Leaving aside the watch, the statistics and most of the science, &lt;strong&gt;is it advisable, or even possible, to run a lot slower than your natural pace?&lt;/strong&gt;  If the answer is yes, shouldn’t there also be some advice on how?  For cyclists, turning down the intensity is a straightforward matter of gearing, but runnning doesn’t really work like that.&lt;/p&gt;
+
+&lt;p&gt;There are all sorts of articles out there advising us on how to run quicker - is it time we had one teaching us how to run slowly?&lt;/p&gt;
+
+    &lt;p&gt;&lt;a href=&quot;/running/biomechanics-of-heart-rate-training/&quot;&gt;The Biomechanics of Heart-Rate Training, or, "How Do I Run Slowly?"&lt;/a&gt; was originally published by Richard Silverton at &lt;a href=&quot;&quot;&gt;Neuron Mint Garden&lt;/a&gt; on August 20, 2014.&lt;/p&gt;
+  </content>
+</entry>
+
+
+<entry>
+  <title type="html"><![CDATA[Understanding Meteor's Low-Level Publications API]]></title>
   <link rel="alternate" type="text/html" href="/meteor/meteor-low-level-publications/"/>
   <id>/meteor/meteor-low-level-publications</id>
   <published>2014-08-01T13:26:57+01:00</published>
@@ -28,11 +104,11 @@
   <content type="html">
     &lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;/h2&gt;
 
-&lt;p&gt;As increasing numbers of developers are discovering, &lt;a href=&quot;https://www.meteor.com/&quot;&gt;Meteor&lt;/a&gt; is an incredibly powerful, feature-rich platform with which to develop web apps.  By obviating many of the traditional frustrations in rolling out a production app, like authentication and synchronisation of data on client and server, Meteor makes it remarkably easy to progress from idea to prototype to fully-functional product.  However, the developer can become dazzled by such power, and there’s the danger that he or she can end up producing complex, multi-page applications without fully understanding one of the most fundamental components of the platform - the Pub/Sub framework.  This is certainly an accurate description of my personal history with Meteor, and a situation I have very recently put right.&lt;/p&gt;
+&lt;p&gt;As increasing numbers of developers are discovering, &lt;a href=&quot;https://www.meteor.com/&quot;&gt;Meteor&lt;/a&gt; is an incredibly powerful, feature-rich platform with which to create web apps.  By obviating many of the traditional frustrations involved in rolling out a production app, like user authentication or synchronisation of data on client and server, Meteor makes it remarkably easy to progress from idea to prototype to fully-functional product in no time at all.  However, the developer can become dazzled by such power, and there’s the danger that he or she can end up producing complex, multi-page applications without fully understanding one of the most fundamental components of the platform - the Pub/Sub framework.  This is certainly an accurate description of my personal history with Meteor, and a situation I have recently put right, as I describe below.&lt;/p&gt;
 
 &lt;h2 id=&quot;meteorpublish&quot;&gt;Meteor.publish&lt;/h2&gt;
 
-&lt;p&gt;The first remark I should make is that the canonical demonstration of Meteor’s low-level publish API not only exists, but it’s almost the first thing to appear in the official documentation.  I can only assume that this is part of the problem - the &lt;code&gt;counts-by-room&lt;/code&gt; example is relatively subtle and benefits from some understanding of &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; (the protocol developed by Meteor specifically for client-server communication) - which will probably leave many readers skipping over it on their first visit in their enthusiasm to get to the shiny stuff.  Which, it turns out, is a mistake, at least judging by the number of recent questions on SO which can be resolved with a good understanding of this example.&lt;/p&gt;
+&lt;p&gt;The first remark I should make is that the canonical demonstration of Meteor’s low-level publish API not only exists, but it’s &lt;a href=&quot;http://docs.meteor.com/#meteor_publish&quot;&gt;almost the first thing&lt;/a&gt; to appear in the official documentation.  I can only assume that this is part of the problem - the &lt;code&gt;counts-by-room&lt;/code&gt; example is relatively subtle and benefits from some understanding of &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; (the protocol developed by Meteor specifically for client-server communication) - which will probably leave many readers skipping over it on their first visit in their enthusiasm to get to the shiny stuff below.  Which, it turns out, is a mistake, at least judging by the number of &lt;a href=&quot;http://stackoverflow.com/questions/25033436/is-it-possible-to-publish-subscribe-to-a-remote-api-instead-of-a-collection-in-m&quot;&gt;recent&lt;/a&gt; &lt;a href=&quot;http://stackoverflow.com/questions/25086631/meteor-reactive-publishes-subscribes&quot;&gt;questions&lt;/a&gt; &lt;a href=&quot;http://stackoverflow.com/questions/25079984/meteor-publish-method&quot;&gt;on&lt;/a&gt; &lt;a href=&quot;http://stackoverflow.com/questions/25045783/meteor-ddp-how-to-get-notified-when-a-new-document-is-added-to-a-collection/25069279#25069279&quot;&gt;SO&lt;/a&gt; which can be resolved with a good understanding of this topic.&lt;/p&gt;
 
 &lt;h3 id=&quot;two-publication-patterns-within-a-single-method&quot;&gt;Two Publication Patterns within a single Method&lt;/h3&gt;
 
@@ -81,7 +157,7 @@
 
 &lt;h3 id=&quot;distributed-data-protocol&quot;&gt;Distributed Data Protocol&lt;/h3&gt;
 
-&lt;p&gt;The second way to use the Pub/Sub model is really just an API to exactly this &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; flow from the server side, relating to a specific connection and subscription request.  What this means is that the &lt;code&gt;name&lt;/code&gt;d publication function will be run once for each incoming subscription on that &lt;code&gt;name&lt;/code&gt;, but rather than returning a cursor and leaving it for Meteor to generate the required &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; messages, it allows us to send customised &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; messages to suit the requirements of the application.  Here’s an example which does exactly the same as the one above:&lt;/p&gt;
+&lt;p&gt;The second way to use the Pub/Sub model is really just an API to exactly this &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; flow from the server side, relating to a specific connection and subscription request.  What this means is that the named publication function will be run once for each incoming subscription on that name, but rather than returning a cursor and leaving it for Meteor to generate the required &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; messages, it allows us to send customised &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; messages to suit the requirements of the application.  Here’s an example which does exactly the same as the one above:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ddpPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
   &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
@@ -125,7 +201,7 @@
 
 &lt;h3 id=&quot;existing-documents-versus-new-additions&quot;&gt;Existing Documents versus New Additions&lt;/h3&gt;
 
-&lt;p&gt;One question which is regularly asked on Stack Overflow and elsewhere relates to how the client can be sure it’s local collection has been fully synchronised before attempting to work with it.  I would argue that the majority of cases can be resolved with sensible use of the &lt;code&gt;ready()&lt;/code&gt; method, which is reactive and triggered by the DDP &lt;code&gt;ready&lt;/code&gt; method we’ve seen above.  However, whilst I am no expert on websockets and stand to be corrected, I am certain that there are cases in which the order in which messages are sent from the server isn’t necessarily the same as the order in which they’re received by the client, at least if there is a degree of latency involved.  What this means is that the &lt;code&gt;ready&lt;/code&gt; message would arrive before one or more documents.  Perhaps this is no problem, as Meteor’s built-in reactivity will re-render everything as soon as the missing documents arrive and the client will barely even notice.  But what if even that outcome is unacceptable?&lt;/p&gt;
+&lt;p&gt;One question which is regularly asked on Stack Overflow and elsewhere relates to how the client can be sure its local collection has been fully synchronised before attempting to work with it.  I would argue that the majority of cases can be resolved with sensible use of the &lt;code&gt;ready()&lt;/code&gt; method, which is reactive and triggered by the DDP &lt;code&gt;ready&lt;/code&gt; message we’ve seen above.  However, whilst I am no expert on websockets and stand to be corrected, I am certain that there are cases in which the order in which messages are sent from the server isn’t necessarily the same as the order in which they’re received by the client, at least if there is a degree of latency involved.  What this means is that the &lt;code&gt;ready&lt;/code&gt; message would arrive before one or more documents.  Perhaps this is no problem, as Meteor’s built-in reactivity will re-render everything as soon as the missing documents arrive and the client will barely even notice.  But what if even that outcome is unacceptable?&lt;/p&gt;
 
 &lt;h4 id=&quot;pattern-1-a-document-counter&quot;&gt;Pattern 1: A Document Counter&lt;/h4&gt;
 
@@ -162,7 +238,7 @@
   &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This publish function will also populate the &lt;code&gt;CollectionCount&lt;/code&gt; collection (which only needs to be constructed on the client) with an object that contains the number of documents in the existing set.  You can then delay mission critical logic on the client until &lt;code&gt;TestData.find().count() === CollectionCount.findOne({Collection: &quot;testdata&quot;}).Count&lt;/code&gt;.  Note that the actual logic will need to be slightly longer to account for the period in which &lt;code&gt;CollectionCount.findOne({Collection: &quot;testdata&quot;})&lt;/code&gt; returns nothing as the publish function hasn’t yet sent the corresponding message.&lt;/p&gt;
+&lt;p&gt;This publish function will also populate the &lt;code&gt;CollectionCount&lt;/code&gt; collection (which only needs to be constructed on the client) with an object that contains the number of documents in the existing set.  You can then delay mission critical logic on the client until &lt;code&gt;TestData.find().count()&lt;/code&gt; is equal to &lt;code&gt;CollectionCount.findOne({Collection: &quot;testdata&quot;}).Count&lt;/code&gt;.  Note that the actual logic will need to be slightly more involved to account for the period in which &lt;code&gt;CollectionCount.findOne({Collection: &quot;testdata&quot;})&lt;/code&gt; returns nothing as the publish function hasn’t yet sent the corresponding message.&lt;/p&gt;
 
 &lt;h4 id=&quot;pattern-2-an-additional-field&quot;&gt;Pattern 2: An Additional Field&lt;/h4&gt;
 
@@ -213,7 +289,7 @@
 &lt;/ul&gt;
 
 
-    &lt;p&gt;&lt;a href=&quot;/meteor/meteor-low-level-publications/&quot;&gt;Understanding Low-Level Publications in Meteor&lt;/a&gt; was originally published by Richard Silverton at &lt;a href=&quot;&quot;&gt;Neuron Mint Garden&lt;/a&gt; on August 01, 2014.&lt;/p&gt;
+    &lt;p&gt;&lt;a href=&quot;/meteor/meteor-low-level-publications/&quot;&gt;Understanding Meteor's Low-Level Publications API&lt;/a&gt; was originally published by Richard Silverton at &lt;a href=&quot;&quot;&gt;Neuron Mint Garden&lt;/a&gt; on August 01, 2014.&lt;/p&gt;
   </content>
 </entry>
 
