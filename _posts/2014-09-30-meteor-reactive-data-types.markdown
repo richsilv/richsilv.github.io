@@ -94,7 +94,7 @@ ReactiveVar is in some respects an atomic reactive unit, like a single Session v
 
 ###### The (rather limited) documentation appears in [the code on Github](https://github.com/meteor/meteor/blob/devel/packages/reactive-dict/reactive-dict.js).
 
-To add the ReactiveVar constructor to your project:
+To add the ReactiveDict constructor to your project:
 
 {% highlight bash %}
 $ meteor add reactive-dict
