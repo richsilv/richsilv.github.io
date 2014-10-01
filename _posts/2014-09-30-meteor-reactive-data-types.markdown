@@ -8,7 +8,7 @@ comments: true
 
 ## Motivation
 
-Much of the perceived magic that Meteor provides is the result of its wonderful reactive data model, which, when implemented properly, sees your app update itself automatically on changes in state or data, without the need for any dom manipulation on the part of the developer.  However, working out exactly *what* is reactive, *how* it's reactive and *when* to use it is something that may not be completely obvious for those at the start of their journey with Meteor.
+Much of the perceived magic that Meteor provides is the result of its wonderful reactive data model, which, when implemented properly, sees your app update itself automatically on changes in state or data, without the need for any DOM manipulation on the part of the developer.  However, working out exactly *what* is reactive, *how* it's reactive and *when* to use it is something that may not be completely obvious for those at the start of their journey with Meteor.
 
 # Reactivity out of the box
 
