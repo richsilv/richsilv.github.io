@@ -8,7 +8,7 @@ comments: true
 
 ## Motivation
 
-Much of the perceived magic that Meteor provides is the result of its wonderful reactive data model, which, when implemented properly, sees your app update itself automatically on changes in state or data, without the need for any dom manipulation on the part of the developer.  However, working out exactly *what* is reactive, *how* it's reactive and *when* to use it is something that may not be completely obvious for those at the start of their journey with Meteor.
+Much of the perceived magic that Meteor provides is the result of its wonderful reactive data model, which, when implemented properly, sees your app update itself automatically on changes in state or data, without the need for any DOM manipulation on the part of the developer.  However, working out exactly *what* is reactive, *how* it's reactive and *when* to use it is something that may not be completely obvious for those at the start of their journey with Meteor.
 
 # Reactivity out of the box
 
@@ -94,7 +94,7 @@ ReactiveVar is in some respects an atomic reactive unit, like a single Session v
 
 ###### The (rather limited) documentation appears in [the code on Github](https://github.com/meteor/meteor/blob/devel/packages/reactive-dict/reactive-dict.js).
 
-To add the ReactiveVar constructor to your project:
+To add the ReactiveDict constructor to your project:
 
 {% highlight bash %}
 $ meteor add reactive-dict
