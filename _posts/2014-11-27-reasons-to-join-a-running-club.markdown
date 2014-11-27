@@ -22,7 +22,7 @@ There are a *lot* of articles on the internet (and in print) promising to revolu
 
 ## 3. More races, more results to celebrate and more encouragement
 
-Not only does joining a club enable you to participate in some [fantastic races](http://www.metleague.co.uk/) that would otherwise pass you by, you get to run them as part of a team.  Joining a pocket of your club's colours on the start line of a major race is a great way to calm the nerves and guarantee you're setting off with runners of equivalent ability and aspiration, and there's guaranteed to be a hatful of good results to celebrate at the finish.  Not only that, but the amount of encouragement you get from spectators you've never even seen before is phenomenal; I imagine most of these people are the friends or family of club-mates, but it's possible that some of them just like green and orange...
+Not only does joining a club enable you to participate in some [fantastic races](http://www.metleague.co.uk/) that would otherwise pass you by, you get to run them as part of a team.  Joining a pocket of your club's colours on the start line of a major race is a great way to calm the nerves and guarantee you're setting off with runners of equivalent ability and aspiration, and there's certain to be a hatful of good results to celebrate at the finish.  Not only that, but the amount of encouragement you get from spectators you've never even seen before is phenomenal; I imagine most of these people are the friends or family of club-mates, but it's possible that some of them just like green and orange...
 
 ![Running Screenshot](/assets/chasers-stevenage.jpg)
 
