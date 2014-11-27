@@ -8,7 +8,7 @@ comments: true
 
 ## Motivation
 
-It's a little over 18 months since I joined the [Mornington Chasers](http://www.chaser.me.uk/), a running club based in Kentish Town in North London.  Whilst I've never regretted the decision, it's taken time for all the reasons why joining a club is such a great idea for running enthusiasts to become apparent, so I thought I'd share some of them.
+It's a little over 18 months since I joined the [Mornington Chasers](http://www.chaser.me.uk/), a running club based in Kentish Town in North London.  Whilst I've never regretted the decision, it's taken time for all the reasons that joining a club is such a great idea for running enthusiasts to become apparent, so I thought I'd share some of them.
 
 ## 1. Other runners are nice
 
