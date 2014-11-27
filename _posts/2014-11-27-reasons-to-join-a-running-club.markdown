@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Reasons to join a Running Club""
+title:  "Reasons to join a Running Club"
 date:   2014-11-27 20:13:41
 categories: running
 comments: true
