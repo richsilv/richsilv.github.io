@@ -14,7 +14,7 @@ Having just implemented a server-side task scheduler with Meteor that allows the
 
 As the number of Meteor packages on Atmosphere increases exponentially, one of the best guarantees of quality is the `percolatestudio` namespace.  They've released the excellent `synced-cron` package, which is far more powerful than the requirements of this use case, but it still works better than any other package I've come across.
 
-```shell
+```sh
 $ meteor add percolatestudio:synced-cron
 ```
 
