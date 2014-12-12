@@ -80,7 +80,7 @@ Meteor.startup(function() {
 		if (mail.date < new Date()) {
 			sendMail(mail)
 		} else {
-			addCronMail(mail._id, mail);
+			addTask(mail._id, mail);
 		}
 	});
 	SyncedCron.start();
