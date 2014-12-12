@@ -14,7 +14,7 @@ Having just implemented a server-side task scheduler with Meteor that allows the
 
 As the number of Meteor packages on Atmosphere increases exponentially, one of the best guarantees of quality is the `percolatestudio` namespace.  They've released the excellent `synced-cron` package, which is far more powerful than the requirements of this use case, but it still works better than any other package I've come across.
 
-```sh
+```
 $ meteor add percolatestudio:synced-cron
 ```
 
@@ -23,6 +23,7 @@ $ meteor add percolatestudio:synced-cron
 Set up a server-side collection to store your tasks in case of server reboot, and the body of the task you want to complete (in this case, sending an email).
 
 ```javascript
+
     FutureTasks = new Meteor.Collection('future_tasks'); // server-side only
 
 	// In this case, "details" should be an object containing a date, plus required e-mail details (recipient, content, etc.)
@@ -41,6 +42,7 @@ Set up a server-side collection to store your tasks in case of server reboot, an
 ## Add functions to schedule and record your tasks
 
 ```javascript
+
     function addTask(id, details) {
 
 	    SyncedCron.add({
@@ -74,6 +76,7 @@ Set up a server-side collection to store your tasks in case of server reboot, an
 ## Process existing tasks on reboot, and start the Cron
 
 ```javascript
+
 	Meteor.startup(function() {
 
 		FutureTasks.find().forEach(function(mail) {
