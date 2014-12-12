@@ -58,7 +58,7 @@ function addTask(id, details) {
 
 }
 
-function scheduleEmail(details) { 
+function scheduleMail(details) { 
 
 	if (details.date < new Date()) {
 		sendMail(details);
@@ -88,6 +88,8 @@ Meteor.startup(function() {
 });
 {% endhighlight %}
 
-## Summary
+Then, you can just call `scheduleMail` from the server whenever you want to add a new task to the queue.
+
+## Conclusion
 
 Hopefully, the code above is straightforward, as is the path to generalising to other use cases beyond sending email.  If there are any questions or suggestions, just let me know.
