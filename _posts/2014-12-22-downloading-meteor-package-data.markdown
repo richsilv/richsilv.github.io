@@ -10,7 +10,7 @@ comments: true
 
 In mid-December, a new page appeared on the [Atmosphere](http://atmospherejs.com) website with a [FAQ](https://atmospherejs.com/i/faq), answering questions which had presumably been asked an enormous number of times by the Meteor community.  Amongst the answers was the following:
 
- > Not at this point, no. For most packaging API needs it would make more sense to go direct to the source (Meteor’s packaging server at packages.meteor.com). The API to do so is not yet documented, but if enough people need it they (the Meteor Development Group) would probably do so.
+ > For most packaging API needs it would make more sense to go direct to the source (Meteor’s packaging server at packages.meteor.com). The API to do so is not yet documented, but if enough people need it they (the Meteor Development Group) would probably do so.
 
  It turns out that pulling data from [packages.meteor.com](http://packages.meteor.com) from within a Meteor app is actually pretty straightforward, so I thought I'd document it.  Please note that this is all the result of a few hours investigation, so there could well be errors or ommissions, for which I welcome corrections.
 
@@ -25,7 +25,7 @@ In mid-December, a new page appeared on the [Atmosphere](http://atmospherejs.com
  The first thing you need to do in order to build your own package catalogue (apologies for the UK spelling) within a Meteor app is to set up a [remote DDP connection](http://docs.meteor.com/#/full/ddp_connect) to the package server at [packages.meteor.com](http://packages.meteor.com).  This is [well documented elsewhere](http://stackoverflow.com/questions/18358526/connect-two-meteor-applications-using-ddp?rq=1), so suffice to say that this should do the trick:
 
  ```javascript
-remote = DDP.connect('http://packages.meteor.com');
+	remote = DDP.connect('http://packages.meteor.com');
  ```
 
  **NOTE** - you'll need to do this from the server as it won't work via AJAX due to a lack of CORS headers.
@@ -35,7 +35,7 @@ remote = DDP.connect('http://packages.meteor.com');
   You should now be able to use `remote` to call `syncNewPackageData` from your own Meteor server almost like calling a Meteor.method within your own app.
 
   ```javascript
-remote.call('syncNewPackageData', syncToken, syncOpts, callback);
+	remote.call('syncNewPackageData', syncToken, syncOpts, callback);
   ```
 
 That should return an object that looks like so:
@@ -60,42 +60,42 @@ I'll leave you to peruse the [source](https://github.com/meteor/meteor/blob/bd54
 ## Example - downloading the entire package catalogue
 
 ```javascript```
-var Future = Npm.require('fibers/future');
+	var Future = Npm.require('fibers/future');
 
-function getPackages() {
+	function getPackages() {
 
-	var fut = new Future(),
-		syncToken = {},
-		collections = {},
-		count = 1,
-		packageRequest = function(cb) {
-			remote.call('syncNewPackageData', syncToken, {}, function(err, res) {
-				console.log('Page ', count++);
-				if (err) fut.throw(new Meteor.Error(err));
-				if (!res) fut.throw(new Meteor.Error('no_results', 'No results returned'));
-				syncToken = res.syncToken || {};
-				_.each(res.collections, function(val, key) {
-					if (_.has(collections, key))
-						collections[key] = collections[key].concat(val);
-					else
-						collections[key] = val;
+		var fut = new Future(),
+			syncToken = {},
+			collections = {},
+			count = 1,
+			packageRequest = function(cb) {
+				remote.call('syncNewPackageData', syncToken, {}, function(err, res) {
+					console.log('Page ', count++);
+					if (err) fut.throw(new Meteor.Error(err));
+					if (!res) fut.throw(new Meteor.Error('no_results', 'No results returned'));
+					syncToken = res.syncToken || {};
+					_.each(res.collections, function(val, key) {
+						if (_.has(collections, key))
+							collections[key] = collections[key].concat(val);
+						else
+							collections[key] = val;
+					});
+					// Using setImmediate to allow GC to run each time in case there are a LOT of pages
+					if (!res.upToDate) setImmediate(Meteor.bindEnvironment(packageRequest.bind(this, cb)));		
+					else cb();
 				});
-				// Using setImmediate to allow GC to run each time in case there are a LOT of pages
-				if (!res.upToDate) setImmediate(Meteor.bindEnvironment(packageRequest.bind(this, cb)));		
-				else cb();
+			}
+
+		packageRequest(function() {
+			fut.return({
+				collections: collections,
+				syncToken: syncToken
 			});
-		}
-
-	packageRequest(function() {
-		fut.return({
-			collections: collections,
-			syncToken: syncToken
 		});
-	});
 
-	return fut.wait();
+		return fut.wait();
 
-}
+	}
 ```
 
 ## Limitations
