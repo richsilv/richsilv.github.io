@@ -18,7 +18,7 @@ It turns out that pulling data from [packages.meteor.com](http://packages.meteor
 
 Whilst I don't profess to having a complete understanding of the tools that ship with Meteor, an exploration of [the code](https://github.com/meteor/meteor/tree/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools) makes it fairly clear that the local catalogue which a user accesses from the command-line is an SQLite database which is updated when various actions are performed.
 
-The mechanism via which the update takes place is a Meteor [method call](http://docs.meteor.com/#/full/meteor_call) to `'syncNewPackageData'` on line 83 of [`package-client.js`](https://github.com/meteor/meteor/blob/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools/package-client.js), the arguments to which can largely be inferred from the comments in the surrounding functions.
+The mechanism via which the update takes place is a Meteor [method call](http://docs.meteor.com/#/full/meteor_call) named 'syncNewPackageData' on line 83 of [package-client.js](https://github.com/meteor/meteor/blob/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools/package-client.js), the arguments to which can largely be inferred from the comments in the surrounding functions.
 
 ## Connecting to the package server from your own app
 
