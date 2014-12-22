@@ -24,9 +24,9 @@ In mid-December, a new page appeared on the [Atmosphere](http://atmospherejs.com
 
  The first thing you need to do in order to build your own package catalogue (apologies for the UK spelling) within a Meteor app is to set up a [remote DDP connection](http://docs.meteor.com/#/full/ddp_connect) to the package server at [packages.meteor.com](http://packages.meteor.com).  This is [well documented elsewhere](http://stackoverflow.com/questions/18358526/connect-two-meteor-applications-using-ddp?rq=1), so suffice to say that this should do the trick:
 
- ```javascript
+ {% highlight javascript %}
 	remote = DDP.connect('http://packages.meteor.com');
- ```
+{% endhighlight %}
 
  **NOTE** - you'll need to do this from the server as it won't work via AJAX due to a lack of CORS headers.
 
@@ -34,9 +34,9 @@ In mid-December, a new page appeared on the [Atmosphere](http://atmospherejs.com
 
   You should now be able to use `remote` to call `syncNewPackageData` from your own Meteor server almost like calling a Meteor.method within your own app.
 
-  ```javascript
+ {% highlight javascript %}
 	remote.call('syncNewPackageData', syncToken, syncOpts, callback);
-  ```
+{% endhighlight %}
 
 That should return an object that looks like so:
 
@@ -59,7 +59,7 @@ I'll leave you to peruse the [source](https://github.com/meteor/meteor/blob/bd54
 
 ## Example - downloading the entire package catalogue
 
-```javascript```
+ {% highlight javascript %}
 	var Future = Npm.require('fibers/future');
 
 	function getPackages() {
@@ -96,7 +96,7 @@ I'll leave you to peruse the [source](https://github.com/meteor/meteor/blob/bd54
 		return fut.wait();
 
 	}
-```
+{% endhighlight %}
 
 ## Limitations
 
