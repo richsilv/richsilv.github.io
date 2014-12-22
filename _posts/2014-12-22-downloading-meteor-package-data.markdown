@@ -12,30 +12,30 @@ In mid-December, a new page appeared on the [Atmosphere](http://atmospherejs.com
 
  > For most packaging API needs it would make more sense to go direct to the source (Meteor’s packaging server at packages.meteor.com). The API to do so is not yet documented, but if enough people need it they (the Meteor Development Group) would probably do so.
 
- It turns out that pulling data from [packages.meteor.com](http://packages.meteor.com) from within a Meteor app is actually pretty straightforward, so I thought I'd document it.  Please note that this is all the result of a few hours investigation, so there could well be errors or ommissions, for which I welcome corrections.
+It turns out that pulling data from [packages.meteor.com](http://packages.meteor.com) from within a Meteor app is actually pretty straightforward, so I thought I'd document it.  Please note that this is all the result of a few hours investigation, so there could well be errors or ommissions, for which I welcome corrections.
 
- ## Local Catalogue
+## Local Catalogue
 
- Whilst I don't profess to having a complete understanding of the tools that ship with Meteor, an exploration of [the code](https://github.com/meteor/meteor/tree/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools) makes it fairly clear that the local catalogue which a user accesses from the command-line is an SQLite database which is updated when various actions are performed.
+Whilst I don't profess to having a complete understanding of the tools that ship with Meteor, an exploration of [the code](https://github.com/meteor/meteor/tree/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools) makes it fairly clear that the local catalogue which a user accesses from the command-line is an SQLite database which is updated when various actions are performed.
 
- The mechanism via which the update takes place is a Meteor [method call](http://docs.meteor.com/#/full/meteor_call) to `'syncNewPackageData'` on line 83 of [`package-client.js`](https://github.com/meteor/meteor/blob/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools/package-client.js), the arguments to which can largely be inferred from the comments in the surrounding functions.
+The mechanism via which the update takes place is a Meteor [method call](http://docs.meteor.com/#/full/meteor_call) to `'syncNewPackageData'` on line 83 of [`package-client.js`](https://github.com/meteor/meteor/blob/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools/package-client.js), the arguments to which can largely be inferred from the comments in the surrounding functions.
 
- ## Connecting to the package server from your own app
+## Connecting to the package server from your own app
 
- The first thing you need to do in order to build your own package catalogue (apologies for the UK spelling) within a Meteor app is to set up a [remote DDP connection](http://docs.meteor.com/#/full/ddp_connect) to the package server at [packages.meteor.com](http://packages.meteor.com).  This is [well documented elsewhere](http://stackoverflow.com/questions/18358526/connect-two-meteor-applications-using-ddp?rq=1), so suffice to say that this should do the trick:
+The first thing you need to do in order to build your own package catalogue (apologies for the UK spelling) within a Meteor app is to set up a [remote DDP connection](http://docs.meteor.com/#/full/ddp_connect) to the package server at [packages.meteor.com](http://packages.meteor.com).  This is [well documented elsewhere](http://stackoverflow.com/questions/18358526/connect-two-meteor-applications-using-ddp?rq=1), so suffice to say that this should do the trick:
 
- {% highlight javascript %}
-	remote = DDP.connect('http://packages.meteor.com');
+{% highlight javascript %}
+remote = DDP.connect('http://packages.meteor.com');
 {% endhighlight %}
 
- **NOTE** - you'll need to do this from the server as it won't work via AJAX due to a lack of CORS headers.
+**NOTE** - you'll need to do this from the server as it won't work via AJAX due to a lack of CORS headers.
 
-  ## Calling `syncNewPackageData`
+## Calling `syncNewPackageData`
 
-  You should now be able to use `remote` to call `syncNewPackageData` from your own Meteor server almost like calling a Meteor.method within your own app.
+You should now be able to use `remote` to call `syncNewPackageData` from your own Meteor server almost like calling a Meteor.method within your own app.
 
  {% highlight javascript %}
-	remote.call('syncNewPackageData', syncToken, syncOpts, callback);
+remote.call('syncNewPackageData', syncToken, syncOpts, callback);
 {% endhighlight %}
 
 That should return an object that looks like so:
@@ -60,42 +60,42 @@ I'll leave you to peruse the [source](https://github.com/meteor/meteor/blob/bd54
 ## Example - downloading the entire package catalogue
 
  {% highlight javascript %}
-	var Future = Npm.require('fibers/future');
+var Future = Npm.require('fibers/future');
 
-	function getPackages() {
+function getPackages() {
 
-		var fut = new Future(),
-			syncToken = {},
-			collections = {},
-			count = 1,
-			packageRequest = function(cb) {
-				remote.call('syncNewPackageData', syncToken, {}, function(err, res) {
-					console.log('Page ', count++);
-					if (err) fut.throw(new Meteor.Error(err));
-					if (!res) fut.throw(new Meteor.Error('no_results', 'No results returned'));
-					syncToken = res.syncToken || {};
-					_.each(res.collections, function(val, key) {
-						if (_.has(collections, key))
-							collections[key] = collections[key].concat(val);
-						else
-							collections[key] = val;
-					});
-					// Using setImmediate to allow GC to run each time in case there are a LOT of pages
-					if (!res.upToDate) setImmediate(Meteor.bindEnvironment(packageRequest.bind(this, cb)));		
-					else cb();
-				});
-			}
+  var fut = new Future(),
+    syncToken = {},
+    collections = {},
+    count = 1,
+    packageRequest = function(cb) {
+      remote.call('syncNewPackageData', syncToken, {}, function(err, res) {
+        console.log('Page ', count++);
+        if (err) fut.throw(new Meteor.Error(err));
+        if (!res) fut.throw(new Meteor.Error('no_results', 'No results returned'));
+        syncToken = res.syncToken || {};
+        _.each(res.collections, function(val, key) {
+          if (_.has(collections, key))
+            collections[key] = collections[key].concat(val);
+          else
+            collections[key] = val;
+        });
+        // Using setImmediate to allow GC to run each time in case there are a LOT of pages
+        if (!res.upToDate) setImmediate(Meteor.bindEnvironment(packageRequest.bind(this, cb)));    
+        else cb();
+      });
+    }
 
-		packageRequest(function() {
-			fut.return({
-				collections: collections,
-				syncToken: syncToken
-			});
-		});
+  packageRequest(function() {
+    fut.return({
+      collections: collections,
+      syncToken: syncToken
+    });
+  });
 
-		return fut.wait();
+  return fut.wait();
 
-	}
+}
 {% endhighlight %}
 
 ## Limitations
