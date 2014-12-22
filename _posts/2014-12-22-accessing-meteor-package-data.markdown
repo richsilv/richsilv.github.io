@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Downloading Meteor Package Data"
+title:  "Accessing Meteor Package Data"
 date:   2014-12-22 12:06:57
 categories: meteor
 comments: true
