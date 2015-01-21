@@ -12,10 +12,10 @@ Having just implemented a server-side task scheduler with Meteor that allows the
 
 ## Synced-Cron
 
-As the number of Meteor packages on Atmosphere increases exponentially, one of the best guarantees of quality is the `percolate` namespace.  They've released the excellent `synced-cron` package, which is far more powerful than the requirements of this use case, but it still works better than any other package I've come across.
+As the number of Meteor packages on Atmosphere increases exponentially, one of the best guarantees of quality is the `percolatestudio` namespace.  They've released the excellent `synced-cron` package, which is far more powerful than the requirements of this use case, but it still works better than any other package I've come across.
 
 {% highlight bash %}
-$ meteor add percolate:synced-cron
+$ meteor add percolatestudio:synced-cron
 {% endhighlight %}
 
 ## Set up your task and a schedule collection
