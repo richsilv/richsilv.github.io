@@ -18,7 +18,9 @@ The Meteor core package [webapp](https://github.com/meteor/meteor/tree/devel/pac
 However, extra functionality can be provided by adding the [simple:json-routes](https://github.com/stubailo/meteor-rest/tree/master/packages/json-routes) package by core dev Sashko; ostensibly, its purpose is to allow apps to respond to requests (optionally including json bodies) to respond with json objects.  None of that's required here, but the package also includes [connect-route](https://github.com/baryshev/connect-route), a router for Connect which allows parameters to be passed in the URL.
 
 {% highlight shell %}
+
 meteor add simple:json-routes
+
 {% endhighlight %}
 
 ## A Contrived Example
@@ -26,6 +28,7 @@ meteor add simple:json-routes
 Let's say we have three individuals in a collection, all of which have associated files on the local filesystem.  We'd like to set up a route from which we can download the relevant file by supplying the individual's name.
 
 {% highlight javascript %}
+
 People = new Mongo.Collection('people');
 
 if (Meteor.isServer) {
@@ -41,6 +44,7 @@ if (Meteor.isServer) {
   });
 
 }
+
 {% endhighlight %}
 
 ## Registering Server-side Routes
@@ -48,6 +52,7 @@ if (Meteor.isServer) {
 The [JSON-Routes API](https://github.com/stubailo/meteor-rest/tree/master/packages/json-routes) now makes it trivially easy to register an appropriate route, which we can use to return the file in question as a download.
 
 {% highlight javascript %}
+
 // THIS CODE SHOULD BE RUN ONLY ON THE SERVER
 
 // we can Npm.require fs as a core Node package, but we'd need to add
@@ -79,6 +84,7 @@ JsonRoutes.add('get', '/file/:name', function(req, res, next) {
   }
 
 });
+
 {% endhighlight %}
 
 Two things to point out from the above example:
