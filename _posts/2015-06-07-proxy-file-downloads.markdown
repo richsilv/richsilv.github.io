@@ -90,6 +90,6 @@ JsonRoutes.add('get', '/file/:name', function(req, res, next) {
 Two things to point out in the above example:
 
 1. There's no error-handling above, so if the app is unable to find the file in question it will simply throw.
-2. A more realistic example probably wouldn't be reading files from the local filesystem, but more likely from dedicated cloud storage.  However, it's trivial to adapt this code to serve files by creating readable streams from [AWS S3](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getObject-property) or [Google Cloud Storage](https://googlecloudplatform.github.io/gcloud-node/#/docs/v0.14.0/storage/file?method=createReadStream).  This way, the objects in question can remain both private and hidden, and only accessible to the public via your Meteor API.
+2. A more realistic example probably wouldn't be reading files from the local filesystem, but more likely from dedicated cloud storage.  However, it's trivial to adapt this code to serve files by creating readable streams from [AWS S3](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Request.html#createReadStream-property) or [Google Cloud Storage](https://googlecloudplatform.github.io/gcloud-node/#/docs/v0.14.0/storage/file?method=createReadStream).  This way, the objects in question can remain both private and hidden, and only accessible to the public via your Meteor API.
 
 Comments appreciated.
