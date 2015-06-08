@@ -4,13 +4,371 @@
 <generator uri="https://github.com/mojombo/jekyll">Jekyll</generator>
 <link rel="self" type="application/atom+xml" href="/feed.xml" />
 <link rel="alternate" type="text/html" href="/" />
-<updated>2014-09-30T17:24:35+01:00</updated>
+<updated>2015-06-08T10:30:27+01:00</updated>
 <id>/</id>
 <author>
   <name>Richard Silverton</name>
   <uri>/</uri>
   <email>silverton.richard@googlemail.com</email>
 </author>
+
+
+<entry>
+  <title type="html"><![CDATA[Proxy File Downloads in Meteor]]></title>
+  <link rel="alternate" type="text/html" href="/meteor/proxy-file-downloads/"/>
+  <id>/meteor/proxy-file-downloads</id>
+  <published>2015-06-07T22:44:31+01:00</published>
+  <updated>2015-06-07T22:44:31+01:00</updated>
+  <author>
+    <name>Richard Silverton</name>
+    <uri></uri>
+    <email>silverton.richard@googlemail.com</email>
+  </author>
+  
+  <content type="html">
+    &lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;/h2&gt;
+
+&lt;p&gt;I haven’t blogged about Meteor in a long time (since 2014, in fact), so it’s about time.
+Conveniently, a recent Meteor project which required proxy routes to file downloads provides a great opportunity for a post, as it’s a feature that may well be of interest to others and is extremely easy to set up.&lt;/p&gt;
+
+&lt;h2 id=&quot;under-the-hood&quot;&gt;Under the hood&lt;/h2&gt;
+
+&lt;p&gt;The Meteor core package &lt;a href=&quot;https://github.com/meteor/meteor/tree/devel/packages/webapp&quot;&gt;webapp&lt;/a&gt; uses &lt;a href=&quot;https://www.npmjs.com/package/connect&quot;&gt;Connect&lt;/a&gt; under the hood to serve content to browsers, and it’s relatively easy to use &lt;a href=&quot;https://docs.meteor.com/#/full/webapp&quot;&gt;&lt;code&gt;WebApp.connectHandlers&lt;/code&gt;&lt;/a&gt; to register server-side routes from which to serve content outside your main web app.&lt;/p&gt;
+
+&lt;p&gt;However, extra functionality can be provided by adding the &lt;a href=&quot;https://github.com/stubailo/meteor-rest/tree/master/packages/json-routes&quot;&gt;simple:json-routes&lt;/a&gt; package by core dev Sashko; ostensibly, its purpose is to allow apps to respond to requests (optionally including json bodies) to respond with json objects.  That’s not required here, but the package also includes &lt;a href=&quot;https://github.com/baryshev/connect-route&quot;&gt;connect-route&lt;/a&gt;, a really useful router for Connect which allows parameters to be passed in the URL.  Adding connect-route could be achieved independently via &lt;a href=&quot;https://github.com/meteorhacks/npm&quot;&gt;meteorhacks:npm&lt;/a&gt;, but it’s much quicker to just add the &lt;em&gt;simple:json-routes&lt;/em&gt; packages, which itself is designed to be lightweight:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;meteor add simple:json-routes&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;a-contrived-example&quot;&gt;A Contrived Example&lt;/h2&gt;
+
+&lt;p&gt;Let’s say we have three individuals in a collection, all of which have associated files on the local filesystem.  We’d like to set up a route from which we can download the relevant file by supplying the individual’s name.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;People&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Mongo&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;people&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;isServer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+  &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;startup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;People&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;findOne&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;People&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;insert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;alice&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;file-a.dat&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;People&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;insert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;bob&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;file-b.dat&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;People&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;insert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;charlie&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;file-a.dat&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;registering-server-side-routes&quot;&gt;Registering Server-side Routes&lt;/h2&gt;
+
+&lt;p&gt;The &lt;a href=&quot;https://github.com/stubailo/meteor-rest/tree/master/packages/json-routes&quot;&gt;JSON-Routes API&lt;/a&gt; now makes it trivially easy to register an appropriate route, which we can use to return the file in question as a download.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// THIS CODE SHOULD BE RUN ONLY ON THE SERVER&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// we can Npm.require fs as a core Node package, but we&amp;#39;d need to add&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// meteorhacks:npm if we wanted to get the file stream from elsewhere&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;// (for example aws-sdk)&lt;/span&gt;
+&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fs&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Npm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;fs&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;nx&quot;&gt;JsonRoutes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;get&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;/file/:name&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;person&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;People&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;findOne&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;person&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// indicate a download and set the filename of the returned file&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;writeHead&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;200&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;s1&quot;&gt;&amp;#39;Content-Disposition&amp;#39;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;attachment; filename=&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;person&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// read a stream from the local filesystem, and pipe it to the response object&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// note that anything you put in the `private` directory will sit in&lt;/span&gt;
+    &lt;span class=&quot;c1&quot;&gt;// assets/app/ when the application has been built&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;fs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;createReadStream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;assets/app/&amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;person&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;pipe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+    &lt;span class=&quot;c1&quot;&gt;// otherwise indicate that the name is not recognised&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;writeHead&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;400&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;cannot find &amp;#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;req&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;params&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Two things to point out in the above example:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;There’s no error-handling above, so if the app is unable to find the file in question it will simply throw.&lt;/li&gt;
+  &lt;li&gt;A more realistic example probably wouldn’t be reading files from the local filesystem, but more likely from dedicated cloud storage.  However, it’s trivial to adapt this code to serve files by creating readable streams from &lt;a href=&quot;http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getObject-property&quot;&gt;AWS S3&lt;/a&gt; or &lt;a href=&quot;https://googlecloudplatform.github.io/gcloud-node/#/docs/v0.14.0/storage/file?method=createReadStream&quot;&gt;Google Cloud Storage&lt;/a&gt;.  This way, the objects in question can remain both private and hidden, and only accessible to the public via your Meteor API.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Comments appreciated.&lt;/p&gt;
+
+    &lt;p&gt;&lt;a href=&quot;/meteor/proxy-file-downloads/&quot;&gt;Proxy File Downloads in Meteor&lt;/a&gt; was originally published by Richard Silverton at &lt;a href=&quot;&quot;&gt;Neuron Mint Garden&lt;/a&gt; on June 07, 2015.&lt;/p&gt;
+  </content>
+</entry>
+
+
+<entry>
+  <title type="html"><![CDATA[Accessing Meteor Package Data]]></title>
+  <link rel="alternate" type="text/html" href="/meteor/accessing-meteor-package-data/"/>
+  <id>/meteor/accessing-meteor-package-data</id>
+  <published>2014-12-22T12:06:57+00:00</published>
+  <updated>2014-12-22T12:06:57+00:00</updated>
+  <author>
+    <name>Richard Silverton</name>
+    <uri></uri>
+    <email>silverton.richard@googlemail.com</email>
+  </author>
+  
+  <content type="html">
+    &lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;/h2&gt;
+
+&lt;p&gt;In mid-December, a new page appeared on the &lt;a href=&quot;http://atmospherejs.com&quot;&gt;Atmosphere&lt;/a&gt; website with a &lt;a href=&quot;https://atmospherejs.com/i/faq&quot;&gt;FAQ&lt;/a&gt;, answering questions which had presumably been asked an enormous number of times by the Meteor community.  Amongst the answers was the following:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;For most packaging API needs it would make more sense to go direct to the source (Meteor’s packaging server at packages.meteor.com). The API to do so is not yet documented, but if enough people need it they (the Meteor Development Group) would probably do so.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;It turns out that pulling data from &lt;a href=&quot;http://packages.meteor.com&quot;&gt;packages.meteor.com&lt;/a&gt; from within a Meteor app is actually pretty straightforward, so I thought I’d document it.  Please note that this is all the result of a few hours investigation, so there could well be errors or ommissions, for which I welcome corrections.&lt;/p&gt;
+
+&lt;h2 id=&quot;local-catalogue&quot;&gt;Local Catalogue&lt;/h2&gt;
+
+&lt;p&gt;Whilst I don’t profess to having a complete understanding of the tools that ship with Meteor, an exploration of &lt;a href=&quot;https://github.com/meteor/meteor/tree/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools&quot;&gt;the code&lt;/a&gt; makes it fairly clear that the local catalogue which a user accesses from the command-line is an SQLite database which is updated when various actions are performed.&lt;/p&gt;
+
+&lt;p&gt;The mechanism via which the update takes place is a Meteor &lt;a href=&quot;http://docs.meteor.com/#/full/meteor_call&quot;&gt;method call&lt;/a&gt; named ‘syncNewPackageData’ on line 83 of &lt;a href=&quot;https://github.com/meteor/meteor/blob/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools/package-client.js&quot;&gt;package-client.js&lt;/a&gt;, the arguments to which can largely be inferred from the comments in the surrounding functions.&lt;/p&gt;
+
+&lt;h2 id=&quot;connecting-to-the-package-server-from-your-own-app&quot;&gt;Connecting to the package server from your own app&lt;/h2&gt;
+
+&lt;p&gt;The first thing you need to do in order to build your own package catalogue (apologies for the UK spelling) within a Meteor app is to set up a &lt;a href=&quot;http://docs.meteor.com/#/full/ddp_connect&quot;&gt;remote DDP connection&lt;/a&gt; to the package server at &lt;a href=&quot;http://packages.meteor.com&quot;&gt;packages.meteor.com&lt;/a&gt;.  This sort of thing is &lt;a href=&quot;http://stackoverflow.com/questions/18358526/connect-two-meteor-applications-using-ddp?rq=1&quot;&gt;well documented elsewhere&lt;/a&gt;, so suffice to say that this should do the trick:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;DDP&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;connect&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;http://packages.meteor.com&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;strong&gt;NOTE&lt;/strong&gt; - you’ll need to do this from the server as it won’t work via AJAX due to a lack of CORS headers.&lt;/p&gt;
+
+&lt;h2 id=&quot;calling-syncnewpackagedata&quot;&gt;Calling &lt;code&gt;syncNewPackageData&lt;/code&gt;&lt;/h2&gt;
+
+&lt;p&gt;You should now be able to use &lt;code&gt;remote&lt;/code&gt; to call &lt;code&gt;syncNewPackageData&lt;/code&gt; from your own Meteor server almost like calling a Meteor.method within your own app.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;syncNewPackageData&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;syncToken&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;syncOpts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;callback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Assuming success, the result looks like so:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/syncPackage.png&quot; alt=&quot;syncPackage object&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;The &lt;code&gt;collections&lt;/code&gt; property contains up to 500 entries in the listed categories.  The ones which will be of interest to package enthusiasts will be &lt;code&gt;packages&lt;/code&gt; and &lt;code&gt;versions&lt;/code&gt; (which actually contains far more metadata):&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/syncPackageCollections.png&quot; alt=&quot;syncPackage collections&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;It also contains some other useful properties:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;syncToken&lt;/code&gt; - this contains a series of UNIX dates which indicate the dateTime up to which results have been returned.  It can be passed back into the &lt;code&gt;syncNewPackageData&lt;/code&gt; invocation to receive another batch of results, which is useful in two different circumstances:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Easy paging if you require the full catalogue to be returned.  Simply pass an empty object as the syncToken on the first invocation, and then the last received syncToken on subsequent invocations until all results have been received (there’s an example of this below).&lt;/li&gt;
+  &lt;li&gt;Easy updates when all you require is a diff.  Pass the most recently received syncToken, and you’ll just get the packages/versions released since then.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;code&gt;upToDate&lt;/code&gt; - this is true if the returned data includes the most recent for all collections; use it to determine when you can stop requesting further pages.&lt;/p&gt;
+
+&lt;p&gt;I’ll leave you to peruse the &lt;a href=&quot;https://github.com/meteor/meteor/blob/bd54f09e4ce299035c2ad57e02f558d64f6b0a93/tools/package-client.js&quot;&gt;source&lt;/a&gt; for details on syncOpts, which doesn’t appear to be especially useful.&lt;/p&gt;
+
+&lt;h2 id=&quot;example---downloading-the-entire-package-catalogue&quot;&gt;Example - downloading the entire package catalogue&lt;/h2&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Future&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Npm&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;fibers/future&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;getPackages&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+  &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fut&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Future&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;syncToken&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{},&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;collections&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{},&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;count&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;packageRequest&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;call&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;syncNewPackageData&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;syncToken&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{},&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;Page &amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;count&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fut&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;err&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fut&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Error&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;no_results&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;No results returned&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;syncToken&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;syncToken&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{};&lt;/span&gt;
+        &lt;span class=&quot;nx&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;each&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;has&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;concat&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+          &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;
+            &lt;span class=&quot;nx&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+        &lt;span class=&quot;c1&quot;&gt;// Using setImmediate to allow GC to run each time in case there are a LOT of pages&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;res&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;upToDate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;setImmediate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bindEnvironment&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;packageRequest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;bind&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)));&lt;/span&gt;    
+        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cb&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+      &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+  &lt;span class=&quot;nx&quot;&gt;packageRequest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nx&quot;&gt;fut&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;collections&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+      &lt;span class=&quot;nx&quot;&gt;syncToken&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;syncToken&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;fut&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;wait&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;limitations&quot;&gt;Limitations&lt;/h2&gt;
+
+&lt;p&gt;The chief limitation of this approach is that potentially useful metadata is missing: namely, the number of downloads.  Whilst the number of stars is probable only stored in Atmosphere’s DB, logic dictates that downloads must be aggregated by Troposphere (packages.meteor.com) since that’s the endpoint the user accesses from the command-line when they’re added.  If anybody has any ideas how this data can be accessed (if at all), I’d love to hear them.&lt;/p&gt;
+
+&lt;p&gt;Atmosphere metadata can also be pulled from their server via DDP (as demonstrated by &lt;a href=&quot;https://github.com/acemtp/meteor-fastosphere&quot;&gt;Vianney Lecroart’s Fastosphere project&lt;/a&gt;), but given that this involves subscribing rather than method calling, I think some caution is required with this sort of remote connection to avoid placing excess load on the remote server, so I would advise studying his code if this interests you.  Vianney polls every 12 hours to take a complete snapshot of the package data and stores it in a dedicated index, thereby limiting the impact on the remote server to a bare minimum, rather than maintaining an open subscription and reactively receiving updates.&lt;/p&gt;
+
+    &lt;p&gt;&lt;a href=&quot;/meteor/accessing-meteor-package-data/&quot;&gt;Accessing Meteor Package Data&lt;/a&gt; was originally published by Richard Silverton at &lt;a href=&quot;&quot;&gt;Neuron Mint Garden&lt;/a&gt; on December 22, 2014.&lt;/p&gt;
+  </content>
+</entry>
+
+
+<entry>
+  <title type="html"><![CDATA[Scheduling events in the future with Meteor (Email example)]]></title>
+  <link rel="alternate" type="text/html" href="/meteor/scheduling-events-in-the-future-with-meteor/"/>
+  <id>/meteor/scheduling-events-in-the-future-with-meteor</id>
+  <published>2014-12-12T09:46:14+00:00</published>
+  <updated>2014-12-12T09:46:14+00:00</updated>
+  <author>
+    <name>Richard Silverton</name>
+    <uri></uri>
+    <email>silverton.richard@googlemail.com</email>
+  </author>
+  
+  <content type="html">
+    &lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;/h2&gt;
+
+&lt;p&gt;Having just implemented a server-side task scheduler with Meteor that allows the user to schedule a given task to take place exactly once in the future, and then answered a question on the same subject on &lt;a href=&quot;http://stackoverflow.com/questions/27430689/how-to-get-email-send-to-send-emails-in-the-future-7-days-14-days-from-now-et/27440807#27440807&quot;&gt;Stack Overflow&lt;/a&gt;, I thought I’d share my method here.&lt;/p&gt;
+
+&lt;h2 id=&quot;synced-cron&quot;&gt;Synced-Cron&lt;/h2&gt;
+
+&lt;p&gt;As the number of Meteor packages on Atmosphere increases exponentially, one of the best guarantees of quality is the &lt;code&gt;percolate&lt;/code&gt; namespace.  They’ve released the excellent &lt;code&gt;synced-cron&lt;/code&gt; package, which is far more powerful than the requirements of this use case, but it still works better than any other package I’ve come across.&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;meteor add percolate:synced-cron&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;set-up-your-task-and-a-schedule-collection&quot;&gt;Set up your task and a schedule collection&lt;/h2&gt;
+
+&lt;p&gt;Set up a server-side collection to store your tasks in case of server reboot, and the body of the task you want to complete (in this case, sending an email).&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;FutureTasks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;future_tasks&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// server-side only&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;// In this case, &amp;quot;details&amp;quot; should be an object containing a date, plus required e-mail details (recipient, content, etc.)&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sendMail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+	&lt;span class=&quot;nx&quot;&gt;Email&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;send&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+		&lt;span class=&quot;nx&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;from&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+	        &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+        	&lt;span class=&quot;nx&quot;&gt;etc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;....&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;add-functions-to-schedule-and-record-your-tasks&quot;&gt;Add functions to schedule and record your tasks&lt;/h2&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;addTask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+	&lt;span class=&quot;nx&quot;&gt;SyncedCron&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
+		&lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+		&lt;span class=&quot;nx&quot;&gt;schedule&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;parser&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;recur&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;on&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;fullDate&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;},&lt;/span&gt;
+		&lt;span class=&quot;nx&quot;&gt;job&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;nx&quot;&gt;sendMail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+			&lt;span class=&quot;nx&quot;&gt;FutureTasks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remove&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+			&lt;span class=&quot;nx&quot;&gt;SyncedCron&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remove&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	        	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;scheduleMail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; 
+
+	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;nx&quot;&gt;sendMail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;thisId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;FutureTasks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;insert&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+		&lt;span class=&quot;nx&quot;&gt;addTask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;thisId&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;details&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;		
+	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;process-existing-tasks-on-reboot-and-start-the-cron&quot;&gt;Process existing tasks on reboot, and start the Cron&lt;/h2&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;startup&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+
+	&lt;span class=&quot;nx&quot;&gt;FutureTasks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;forEach&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;mail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+		&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;mail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;date&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;nx&quot;&gt;sendMail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;mail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+			&lt;span class=&quot;nx&quot;&gt;addTask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;mail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;_id&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;mail&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+		&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+	&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
+	&lt;span class=&quot;nx&quot;&gt;SyncedCron&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;start&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;Then, you can just call &lt;code&gt;scheduleMail&lt;/code&gt; from the server whenever you want to add a new task to the queue.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;Hopefully, the code above is straightforward, as is the path to generalising to other use cases beyond sending email.  If there are any questions or suggestions, just let me know.&lt;/p&gt;
+
+    &lt;p&gt;&lt;a href=&quot;/meteor/scheduling-events-in-the-future-with-meteor/&quot;&gt;Scheduling events in the future with Meteor (Email example)&lt;/a&gt; was originally published by Richard Silverton at &lt;a href=&quot;&quot;&gt;Neuron Mint Garden&lt;/a&gt; on December 12, 2014.&lt;/p&gt;
+  </content>
+</entry>
+
+
+<entry>
+  <title type="html"><![CDATA[Reasons to join a Running Club]]></title>
+  <link rel="alternate" type="text/html" href="/running/reasons-to-join-a-running-club/"/>
+  <id>/running/reasons-to-join-a-running-club</id>
+  <published>2014-11-27T20:13:41+00:00</published>
+  <updated>2014-11-27T20:13:41+00:00</updated>
+  <author>
+    <name>Richard Silverton</name>
+    <uri></uri>
+    <email>silverton.richard@googlemail.com</email>
+  </author>
+  
+  <content type="html">
+    &lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;/h2&gt;
+
+&lt;p&gt;It’s a little over 18 months since I joined the &lt;a href=&quot;http://www.chaser.me.uk/&quot;&gt;Mornington Chasers&lt;/a&gt;, a running club based in Kentish Town in North London.  Whilst I’ve never regretted the decision, it’s taken time for all the reasons that joining a club is such a great idea for running enthusiasts to become apparent, so I thought I’d share some of them.&lt;/p&gt;
+
+&lt;h2 id=&quot;other-runners-are-nice&quot;&gt;1. Other runners are nice&lt;/h2&gt;
+
+&lt;p&gt;I’d like to be able to replace “runners” with “people” in that title, but I think that might be verging on naive.  However, my experience of other runners is that they’re a generally good-natured, friendly and decent bunch; either that, or there are just so many similarities between us that it doesn’t really matter what anybody else thinks they’re like.  Maybe it’s the shared commitment to something that regularly involves wheezing up hills in the pouring rain, but regardless of why runners tend to get on well with each other, there’s a lot to be said for joining a club that’s full of them.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/chasers-batterseapark.jpg&quot; alt=&quot;Running Screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;advice-you-can-trust&quot;&gt;2. Advice you can trust&lt;/h2&gt;
+
+&lt;p&gt;There are a &lt;em&gt;lot&lt;/em&gt; of articles on the internet (and in print) promising to revolutionise your running.  I’m sure a lot of them have merit, and experience certainly helps distill the sources down to those that can generally be trusted.  Nevertheless, having &lt;a href=&quot;http://to6224.wix.com/tomcraggs&quot;&gt;professionals on hand&lt;/a&gt; who know what they’re talking about and can provide both specific advice and a broader training regime that’s tried and tested is beneficial to body and mind, and discourages the tendency to flit from running fad to running fad without really committing to a specific plan.&lt;/p&gt;
+
+&lt;h2 id=&quot;more-races-more-results-to-celebrate-and-more-encouragement&quot;&gt;3. More races, more results to celebrate and more encouragement&lt;/h2&gt;
+
+&lt;p&gt;Not only does joining a club enable you to participate in some &lt;a href=&quot;http://www.metleague.co.uk/&quot;&gt;fantastic races&lt;/a&gt; that would otherwise pass you by, you get to run them as part of a team.  Joining a pocket of your club’s colours on the start line of a major race is a great way to calm the nerves and guarantee you’re setting off with runners of equivalent ability and aspiration, and there’s certain to be a hatful of good results to celebrate at the finish.  Not only that, but the amount of encouragement you get from spectators you’ve never even seen before is phenomenal; I imagine most of these people are the friends or family of club-mates, but it’s possible that some of them just like green and orange…&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/chasers-stevenage.jpg&quot; alt=&quot;Running Screenshot&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;anything-thats-really-hard-isnt-quite-so-hard-when-other-people-are-doing-it-with-you&quot;&gt;4. Anything that’s &lt;em&gt;really&lt;/em&gt; hard isn’t quite so hard when other people are doing it with you&lt;/h2&gt;
+
+&lt;p&gt;On to the real motivation for this post.  I’ve recently made a personal commitment not to miss a Thursday session with the club, or otherwise to run the same session at a different time if I have something else on.  These typically involve intervals of different lengths, sometimes at Parliament Hill track, sometimes up and down Primrose Hill, but always to the point of exhaustion.  A long weekend back in West Yorkshire left me squeezing in a hill session on my own late last Thursday afternoon in an attempt to adhere to this commitment, and the beautiful sunset did very little to help me through it alone.&lt;/p&gt;
+
+&lt;p&gt;However difficult blocks of 3mins, 2mins and 1min with 60 secs recovery up and down Primrose Hill are at the best of times, I can guarantee that they’re a lot more difficult without a set of footsteps in front and another behind, a group of gasping companions with whom to attempt stilted conversation during brief stints of recovery, and a bunch of comrades to dejectedly call time and start the next set when everbody’s watch has undeniably recorded the passage of a minute.  If you want to improve, I’m reliably informed that it’s sessions like this that make the difference, and on the evidence of one week there’s no way I’d be able to maintain the same intensity without the club-mates I’m used to chasing round the track.&lt;/p&gt;
+
+&lt;h2 id=&quot;find-a-local-club---its-cheap-accessible-and-theres-one-or-more-in-every-town&quot;&gt;Find a local club - it’s cheap, accessible, and there’s one (or more) in every town&lt;/h2&gt;
+
+&lt;p&gt;Whilst I can’t speak for every club, those which have stringent entry requirements are in a very small minority, and many are happy to welcome runners of all abilities.  The cost is likely to be very affordable, particularly in comparison to gym membership, and there will almost certainly be one or more in your broad locale.  So, you’ve got a search bar top of the page, now use it!&lt;/p&gt;
+
+    &lt;p&gt;&lt;a href=&quot;/running/reasons-to-join-a-running-club/&quot;&gt;Reasons to join a Running Club&lt;/a&gt; was originally published by Richard Silverton at &lt;a href=&quot;&quot;&gt;Neuron Mint Garden&lt;/a&gt; on November 27, 2014.&lt;/p&gt;
+  </content>
+</entry>
 
 
 <entry>
@@ -28,7 +386,7 @@
   <content type="html">
     &lt;h2 id=&quot;motivation&quot;&gt;Motivation&lt;/h2&gt;
 
-&lt;p&gt;Much of the perceived &lt;em&gt;magic&lt;/em&gt; that Meteor provides is the result of its wonderful reactive data model, which, when implemented properly, sees your app update itself automatically on changes in state or data, without the need for any dom manipulation on the part of the developer.  However, working out exactly &lt;em&gt;what&lt;/em&gt; is reactive, &lt;em&gt;how&lt;/em&gt; it’s reactive and &lt;em&gt;when&lt;/em&gt; to use it is something that may not be completely obvious for those that are just coming up to speed with Meteor’s way of doing things.&lt;/p&gt;
+&lt;p&gt;Much of the perceived magic that Meteor provides is the result of its wonderful reactive data model, which, when implemented properly, sees your app update itself automatically on changes in state or data, without the need for any DOM manipulation on the part of the developer.  However, working out exactly &lt;em&gt;what&lt;/em&gt; is reactive, &lt;em&gt;how&lt;/em&gt; it’s reactive and &lt;em&gt;when&lt;/em&gt; to use it is something that may not be completely obvious for those at the start of their journey with Meteor.&lt;/p&gt;
 
 &lt;h1 id=&quot;reactivity-out-of-the-box&quot;&gt;Reactivity out of the box&lt;/h1&gt;
 
@@ -48,9 +406,9 @@
   &lt;/ul&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;As useful as the latter five items in that list may be, they’re clearly only appropriate for very specific circumstances, which leaves the first two available for more generalised reactivity.&lt;/p&gt;
+&lt;p&gt;As useful as the latter five items in that list may be, they’re clearly only appropriate for very specific circumstances, which leaves only the first two available for more generalised reactivity.&lt;/p&gt;
 
-&lt;p&gt;Although it turns out that this is far from the full story, it’s worth reminding ourselves of the benefits and capabilities of each:&lt;/p&gt;
+&lt;p&gt;We’ll have a look at the benefits of both, as well as observing that there are actually other ways of achieving reactivity, both using MDG packages and by building reactive sources oneself.&lt;/p&gt;
 
 &lt;h2 id=&quot;session-variables&quot;&gt;Session variables&lt;/h2&gt;
 
@@ -58,7 +416,7 @@
 
 &lt;p&gt;&lt;em&gt;Session&lt;/em&gt; provides a convenient API for storing and retrieving arbitrary key-value pairs, which are &lt;em&gt;reactive&lt;/em&gt; by default.  What this means is that template helpers or &lt;code&gt;Tracker.autorun&lt;/code&gt; blocks will automatically rerun if they contain a &lt;code&gt;Session.get&lt;/code&gt; method call with a key which has been &lt;code&gt;Session.set&lt;/code&gt; elsewhere.  For example:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Session&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setDefault&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;myName&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Richard&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Session&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;setDefault&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;myName&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&amp;#39;Richard&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
 &lt;span class=&quot;nx&quot;&gt;Template&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;greeting&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;helpers&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
 	&lt;span class=&quot;nx&quot;&gt;myName&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
@@ -66,31 +424,31 @@
 	&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;html&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;template&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;greeting&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;template&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;name=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&amp;quot;greeting&amp;quot;&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
 	&lt;span class=&quot;nt&quot;&gt;&amp;lt;p&amp;gt;&lt;/span&gt;Hello there, {{myName}}&lt;span class=&quot;nt&quot;&gt;&amp;lt;/p&amp;gt;&lt;/span&gt;
 &lt;span class=&quot;nt&quot;&gt;&amp;lt;/template&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;At this point, if we put &lt;code&gt;Session.set('myName', 'Claire')&lt;/code&gt; into the browser console, the &lt;code&gt;&amp;lt;p&amp;gt;&lt;/code&gt; tag in the &lt;code&gt;greeting&lt;/code&gt; template will update with the new name, as we would expect with Meteor reactivity.&lt;/p&gt;
+&lt;p&gt;At this point, if we put &lt;code&gt;Session.set(&#39;myName&#39;, &#39;Claire&#39;)&lt;/code&gt; into the browser console, the &lt;code&gt;&amp;lt;p&amp;gt;&lt;/code&gt; tag in the &lt;code&gt;greeting&lt;/code&gt; template will update with the new name, as we would expect with Meteor reactivity.&lt;/p&gt;
 
 &lt;p&gt;Here are the key things I think you should bear in mind if you’re intending to use Session variables:&lt;/p&gt;
 
 &lt;ol&gt;
   &lt;li&gt;Session values persist across hot reloads.  This is potentially useful during development, but it’s something you need to be aware of to avoid unexpected behaviour.&lt;/li&gt;
   &lt;li&gt;The API isn’t particularly extensive.  In addition to &lt;code&gt;get&lt;/code&gt; and &lt;code&gt;set&lt;/code&gt;, you’re provided with &lt;code&gt;equals&lt;/code&gt; and &lt;code&gt;setDefault&lt;/code&gt;, but this is as far as Session methods extend, which can seem quite clunky if you’re storing large, nested objects this way.  Of course, you could write your own helper methods, but there may be easier alternatives (see below).&lt;/li&gt;
-  &lt;li&gt;The values you store will always sit in the global namespace.  Whilst this shouldn’t be a problem from the perspective of namespace conflicts (as they’re all sitting inside the &lt;code&gt;Session&lt;/code&gt; object), you need to be aware that a Meteor-savvy user can always &lt;code&gt;get&lt;/code&gt; and &lt;code&gt;set&lt;/code&gt; any Session value in the browser console, whether you’d rather it be private or not.&lt;/li&gt;
-  &lt;li&gt;Session variables &lt;strong&gt;will not&lt;/strong&gt; cause their dependencies to rerun when &lt;code&gt;Session.set&lt;/code&gt; is supplied with a value which is equal to the existing value.  This may be an advantage as it probably reduces DOM churn, but bear in mind that you cannot assume dependencies will rerun simply because you’ve called &lt;code&gt;Session.set&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;The values you store will always sit in the global namespace.  Whilst this shouldn’t be a problem from the perspective of namespace conflicts (as they’re all wrapped inside the &lt;code&gt;Session&lt;/code&gt; object), you need to be aware that a Meteor-savvy user can always &lt;code&gt;get&lt;/code&gt; and &lt;code&gt;set&lt;/code&gt; any Session value in the browser console, whether you’d rather it be private or not.&lt;/li&gt;
+  &lt;li&gt;Session variables &lt;strong&gt;will not&lt;/strong&gt; cause their dependencies to rerun when &lt;code&gt;Session.set&lt;/code&gt; is supplied with a value which is equal to the existing value.  This may be an advantage as it potentially reduces DOM thrashing, but bear in mind that you cannot assume dependencies will rerun simply because you’ve called &lt;code&gt;Session.set&lt;/code&gt;.&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;h2 id=&quot;database-queries-on-collections&quot;&gt;Database queries on Collections&lt;/h2&gt;
 
 &lt;h6 id=&quot;the-documentation-can-be-read-herehttpdocsmeteorcomcollections&quot;&gt;The documentation can be &lt;a href=&quot;http://docs.meteor.com/#collections&quot;&gt;read here&lt;/a&gt;.&lt;/h6&gt;
 
-&lt;p&gt;The topic of Collections and their use in Meteor applications is a very large one indeed, so I’ll keep this section brief.  However, here are some things to bear in mind:&lt;/p&gt;
+&lt;p&gt;The topic of Collections and their use in Meteor applications is a very large one indeed, so I’ll keep this section brief.  However, these are the main points regarding reactive data:&lt;/p&gt;
 
 &lt;ol&gt;
   &lt;li&gt;It’s perfectly possible (and often very useful) to define &lt;em&gt;client-only&lt;/em&gt; collections, which will be sessional, and won’t be synchronised with the server.  These give you the full power of the minimongo API without any pub/sub overhead, and have reactivity baked in.&lt;/li&gt;
   &lt;li&gt;For collections to drive reactivity, you actually need to be querying the database from within the Template helper or autorun block; i.e. there needs to be a &lt;code&gt;Collection.find&lt;/code&gt; or &lt;code&gt;findOne&lt;/code&gt; or &lt;code&gt;count&lt;/code&gt; within the helper or autorun - you can’t &lt;code&gt;fetch()&lt;/code&gt; results somewhere else, store them in a variable and expect references to that variable to be reactive (unless of course it’s a reactive variable…).&lt;/li&gt;
-  &lt;li&gt;You can also define a &lt;em&gt;private, client-only&lt;/em&gt; collection (with &lt;code&gt;var MyCollection = new Mongo.Collection(null)&lt;/code&gt;).  This will provide a private, reactive structure, which can be used as a key/value store if you like.  The only difficulty is that you will only be able to update values by using the &lt;code&gt;_id&lt;/code&gt; field (which you’ll probably have store somewhere else) due to the way Meteor treats client-side code, and the fact that you can only store EJSON-able values.&lt;/li&gt;
+  &lt;li&gt;You can also define a &lt;em&gt;private, client-only&lt;/em&gt; collection with the &lt;code&gt;var&lt;/code&gt; keyword (i.e. &lt;code&gt;var MyCollection = new Mongo.Collection(null)&lt;/code&gt;).  This will provide a private, reactive structure, which can be used as a key/value store alternative to Session variables.  The only difficulty is that you will only be able to update values by using the &lt;code&gt;_id&lt;/code&gt; field (which you’ll either have to repeatedly query or else store somewhere) due to the way Meteor treats client-side code.  Like Session variables, you can also only store &lt;a href=&quot;http://docs.meteor.com/#ejson&quot;&gt;EJSON&lt;/a&gt;-able values.&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;h1 id=&quot;reactivevar-and-reactivedict-packages&quot;&gt;ReactiveVar and ReactiveDict Packages&lt;/h1&gt;
@@ -103,29 +461,29 @@
 
 &lt;p&gt;To add the ReactiveVar constructor to your project:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;meteor add reactive-var&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;meteor add reactive-var&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;ReactiveVar is in some respects a generalisation of the Session variable, with the disadvantage that its values will not persist across hot code pushes.  However, there are lots of other advantages:&lt;/p&gt;
+&lt;p&gt;ReactiveVar is in some respects an atomic reactive unit, like a single Session variable, with the disadvantage that its values will not persist across hot code pushes.  However, there are lots of advantages:&lt;/p&gt;
 
 &lt;ol&gt;
   &lt;li&gt;ReactiveVar instances can be scoped as any normal Javascript variable, and can contain any value - not just EJSON.&lt;/li&gt;
-  &lt;li&gt;They also allow you (although they don’t compel you) to define a proprietary &lt;code&gt;equals&lt;/code&gt; function, which will determine the exact circumstances under which resetting the value of the variable will invalidate dependent computations.  This allows you to very easily overwrite the default, Session-like behaviour if required, and ensure that the setting of a ReactiveVar value will always invalidate dependent computations, or supply some more subtle logic.&lt;/li&gt;
+  &lt;li&gt;They also allow you (although they don’t compel you) to define a proprietary &lt;code&gt;equals&lt;/code&gt; function, which will determine the exact circumstances under which resetting the value of the variable will invalidate dependent computations.  This allows you to very easily overwrite the default, Session-like behaviour if required, and ensure that the setting of a ReactiveVar value will always invalidate dependent computations. You could also supply even more subtle logic.&lt;/li&gt;
   &lt;li&gt;However, by default, updating the value of a ReactiveVar will not invalidate computations which depend on it &lt;em&gt;if the new value is the same as the existing one&lt;/em&gt;, exactly like Session variables (provided no &lt;code&gt;equals&lt;/code&gt; function is supplied).&lt;/li&gt;
-  &lt;li&gt;However, unlike Session variables, the value of a ReactiveVar will not be retained across hot code pushes.&lt;/li&gt;
+  &lt;li&gt;To reiterate, unlike Session variables, the value of a ReactiveVar will not be retained across hot code pushes.&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;h2 id=&quot;reactivedict&quot;&gt;ReactiveDict&lt;/h2&gt;
 
 &lt;h6 id=&quot;the-rather-limited-documentation-appears-in-the-code-on-githubhttpsgithubcommeteormeteorblobdevelpackagesreactive-dictreactive-dictjs&quot;&gt;The (rather limited) documentation appears in &lt;a href=&quot;https://github.com/meteor/meteor/blob/devel/packages/reactive-dict/reactive-dict.js&quot;&gt;the code on Github&lt;/a&gt;.&lt;/h6&gt;
 
-&lt;p&gt;To add the ReactiveVar constructor to your project:&lt;/p&gt;
+&lt;p&gt;To add the ReactiveDict constructor to your project:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;meteor add reactive-dict&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;meteor add reactive-dict&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;ReactiveDict is the prototype which is used to construct the global &lt;code&gt;Session&lt;/code&gt; object.  What this means is that all the familiar Session methods and properties are available for any other ReactiveDict you might construct, except you wouldn’t necessarily have to leave the parent object in the global namespace.  Some other things to bear in mind:&lt;/p&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;You can pass an object containing migration data into the constructor - i.e. you can seed the ReactiveDict when it’s created: &lt;code&gt;myDict = new ReactiveDict({foo: 'bar'});&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;You can pass an object containing migration data into the constructor - i.e. you can seed the ReactiveDict when it’s created: &lt;code&gt;myDict = new ReactiveDict({foo: &#39;bar&#39;});&lt;/code&gt;&lt;/li&gt;
   &lt;li&gt;Given that, like a Session object, each key has its own associated dependency, the only reason for creating multiple ReactiveDicts is to keep the information in each private.  Beyond this, segregating your keys into different ReactiveDicts will have no impact on your app’s reactivity.&lt;/li&gt;
 &lt;/ol&gt;
 
@@ -138,7 +496,7 @@
 &lt;p&gt;The basic building block of reactivity is the &lt;code&gt;Tracker.Dependency&lt;/code&gt; prototype.  An object thus constructed has two simple but powerful methods:&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;&lt;code&gt;depend&lt;/code&gt; - this instructs the current computation to rerun when the dependency registers a &lt;code&gt;changed&lt;/code&gt; event.&lt;/li&gt;
+  &lt;li&gt;&lt;code&gt;depend&lt;/code&gt; - this instructs the computation from which this method is called to rerun when the associated dependency registers a &lt;code&gt;changed&lt;/code&gt; event.&lt;/li&gt;
   &lt;li&gt;&lt;code&gt;changed&lt;/code&gt; - this fires the change (thereby invalidating all the &lt;code&gt;depend&lt;/code&gt;ent computations).&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -146,20 +504,20 @@
 
 &lt;h2 id=&quot;proprietary-reactivity-101-the-simplest-example-i-can-think-of&quot;&gt;Proprietary Reactivity 101: the simplest example I can think of&lt;/h2&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;myDep&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Tracker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;myDep&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Tracker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
 
 &lt;span class=&quot;nx&quot;&gt;Tracker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;autorun&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;comp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
 	&lt;span class=&quot;nx&quot;&gt;myDep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;depend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
 	&lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;Something has happened!&amp;quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;If you add the code above to your Meteor javascript, you can then enter &lt;code&gt;myDep.changed()&lt;/code&gt; in the console, and will be rewarded with the expected message.  This is as simple as dependencies get: no explicit data dependency at all, just an object which, when touched, causes all dependent computations to rerun.  Experimenting with this code is a great way to understand how these dependencies work, where they can be applied (try putting the above in a template helper), as well as the rules that govern &lt;code&gt;autorun&lt;/code&gt; blocks (although that’s a whole different topic).&lt;/p&gt;
+&lt;p&gt;If you add the code above to your Meteor javascript, you can then enter &lt;code&gt;myDep.changed()&lt;/code&gt; in the console, and will be rewarded with the expected message.  This is as simple as dependencies get: no explicit data dependency at all, just an object which, when touched, causes all dependent computations to rerun.  Experimenting with this code is a great way to understand how these dependencies work, where they can be applied (try putting the above in a template helper), as well as the rules that govern &lt;code&gt;autorun&lt;/code&gt; blocks (although that’s a whole &lt;a href=&quot;http://docs.meteor.com/#tracker_autorun&quot;&gt;topic in itself&lt;/a&gt;).&lt;/p&gt;
 
 &lt;h2 id=&quot;constructing-a-proper-reactive-variable&quot;&gt;Constructing a proper reactive variable&lt;/h2&gt;
 
 &lt;p&gt;There are undoubtedly some cases for which the simple example above could prove useful, but in general we are going to require some sort of data to be associated with our dependency.  To solve this, we can roll our own equivalent of a ReactiveVar:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;MyDep&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;initial&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;MyDep&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;initial&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
   &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;initial&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
   &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;dep&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Tracker&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Dependency&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
@@ -177,7 +535,7 @@
     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;value&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;The example above should be relatively self explanatory, and you can see how a call to &lt;code&gt;MyDep.get&lt;/code&gt; will in effect register a &lt;code&gt;depend&lt;/code&gt; call within the enclosing computation, hooking up reactivity, and subsequent &lt;code&gt;MyDep.set&lt;/code&gt; calls will spark invalidation via the &lt;code&gt;changed&lt;/code&gt; call (provided the old value differs from the current one).&lt;/p&gt;
+&lt;p&gt;The example above should be relatively self-explanatory, and you can see how a call to &lt;code&gt;MyDep.get&lt;/code&gt; will in effect register a &lt;code&gt;depend&lt;/code&gt; call within the enclosing computation, hooking up reactivity, and subsequent &lt;code&gt;MyDep.set&lt;/code&gt; calls will spark invalidation via the &lt;code&gt;changed&lt;/code&gt; call (provided the old value differs from the current one).&lt;/p&gt;
 
 &lt;h2 id=&quot;taking-things-further&quot;&gt;Taking things further&lt;/h2&gt;
 
@@ -186,8 +544,8 @@
 &lt;ul&gt;
   &lt;li&gt;Removing the requirement that the new value differs from the old one, so that dependent computations are always invalidated.&lt;/li&gt;
   &lt;li&gt;Returning cloned results from the &lt;code&gt;get&lt;/code&gt; method; hopefully you will realise that if the &lt;code&gt;value&lt;/code&gt; of a &lt;code&gt;MyDep&lt;/code&gt; is an object, the &lt;code&gt;get&lt;/code&gt; method will return &lt;em&gt;a reference to that object&lt;/em&gt; rather than a copy of it (and if you don’t, read some Crockford!).  This can cause unexpected behaviour, and it may be better to explicitly test for this and clone an object value before returning it, depending on your use case.&lt;/li&gt;
-  &lt;li&gt;Adding the facility to &lt;code&gt;get&lt;/code&gt; and &lt;code&gt;set&lt;/code&gt; keys within your object, possibly recursively.  Rather than having a whole array of individual dependencies relating to the different keys (like we saw in ReactiveDict), maybe it would be better to have a single dependency, which is always &lt;code&gt;changed&lt;/code&gt; whenever one of the keys is changed, but has an API that means you don’t have to &lt;code&gt;get&lt;/code&gt; the whole object just to get the value of one of its keys.&lt;/li&gt;
-  &lt;li&gt;Adding some sort of debug counter to keep track of the total number of invalidations your reactive variable is registering.  You could have a development mode which stopped registering &lt;code&gt;changed&lt;/code&gt; calls after a certain number to stop your browser hanging and allow you to do some debugging.  This is immensely helpful if you ever have problems with infinite invalidation loops!&lt;/li&gt;
+  &lt;li&gt;Adding the facility to &lt;code&gt;get&lt;/code&gt; and &lt;code&gt;set&lt;/code&gt; individual keys within your object, possibly recursively.  Rather than having a whole array of individual dependencies relating to the different keys (like we saw in ReactiveDict), maybe it would be better to have a single dependency, which is always &lt;code&gt;changed&lt;/code&gt; whenever one of the keys is changed, but has an API that means you don’t have to &lt;code&gt;get&lt;/code&gt; the whole object just to get the value of one of its keys.&lt;/li&gt;
+  &lt;li&gt;Adding some sort of debug counter to keep track of the total number of invalidations your reactive variable is registering.  You could have a development mode which stopped registering &lt;code&gt;changed&lt;/code&gt; calls beyond a certain number to stop your browser hanging and allow you to do some debugging.  This is immensely helpful if you ever have problems with infinite invalidation loops!&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;p&gt;Some of the ideas above are implemented in this &lt;a href=&quot;http://meteorpad.com/pad/asdkFDnpZpS7KZQT7&quot;&gt;MeteorPad&lt;/a&gt;.  Let me know if you can think of any more!&lt;/p&gt;
@@ -300,7 +658,7 @@
 
 &lt;p&gt;Here’s the basic setup to which I’ll be referring, which involves a test collection being populated with a random integer in the range [0, 1000) every ten seconds.  There’s also an example of the familiar cursor-based pub-sub pattern:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;TestData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;testdata&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;TestData&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;testdata&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 
 &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;isServer&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
   &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;cursorPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
@@ -343,7 +701,7 @@
 
 &lt;p&gt;The second way to use the Pub/Sub model is really just an API to exactly this &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; flow from the server side, relating to a specific connection and subscription request.  What this means is that the named publication function will be run once for each incoming subscription on that name, but rather than returning a cursor and leaving it for Meteor to generate the required &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; messages, it allows us to send customised &lt;a href=&quot;https://github.com/meteor/meteor/blob/master/packages/livedata/DDP.md&quot;&gt;DDP&lt;/a&gt; messages to suit the requirements of the application.  Here’s an example which does exactly the same as the one above:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ddpPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ddpPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
   &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
   &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;subHandle&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;TestData&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;find&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;||&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{}).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;observeChanges&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;({&lt;/span&gt;
@@ -391,7 +749,7 @@
 
 &lt;p&gt;One way of confirming that the original document set had arrived intact would be to send the number of documents &lt;code&gt;added&lt;/code&gt; before the &lt;code&gt;ready&lt;/code&gt; call as an additional document itself.  This would best be done using another collection to avoid the need to filter it out of the data set that you’re actually interested in communicating.&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;CollectionCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;collectioncount&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// NOTE THAT THIS ONLY NEEDS TO BE DECLARED ON THE CLIENT&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;CollectionCount&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Collection&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;collectioncount&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// NOTE THAT THIS ONLY NEEDS TO BE DECLARED ON THE CLIENT&lt;/span&gt;
 
 &lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ddpPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// WHILST THIS IS OBVIOUSLY ON THE SERVER&lt;/span&gt;
   &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
@@ -428,7 +786,7 @@
 
 &lt;p&gt;A similar scenario is one in which we don’t need to know the exact number of documents in the collection when we subscribe, but we do need to know which they are.  This can be solved as follows:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ddpPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;Meteor&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;publish&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;ddpPub&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;filter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
   &lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;this&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
       &lt;span class=&quot;nx&quot;&gt;ready&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 
@@ -468,7 +826,7 @@
 
 &lt;ul&gt;
   &lt;li&gt;If you have a Template helper which has a dependency on the readiness of a subscription, this allows you to resubscribe and maintain reactivity.  What this means is that &lt;code&gt;mySub.ready()&lt;/code&gt; in the example above will always reactively supply the state of the current subscription, even though the actual subscription object has been stopped and replaced by a new one.  This is very convenient!&lt;/li&gt;
-  &lt;li&gt;In contrast, if you &lt;em&gt;don’t&lt;/em&gt; put your subscription in a &lt;code&gt;Deps.autorun&lt;/code&gt; block like this, your reactivity can break when you resubscribe.  This means that if you were using &lt;code&gt;mySub.ready()&lt;/code&gt; in a helper function (or another reactive context) and then resubscribe with &lt;code&gt;mySub = Meteor.subscribe('testdata', newFilter);&lt;/code&gt; your helper will not rerun.  For this reason I would always recommend putting your subscriptions in &lt;code&gt;Deps.autorun&lt;/code&gt; blocks and having them update by changing the value of Session variables, or another reactive data source.&lt;/li&gt;
+  &lt;li&gt;In contrast, if you &lt;em&gt;don’t&lt;/em&gt; put your subscription in a &lt;code&gt;Deps.autorun&lt;/code&gt; block like this, your reactivity can break when you resubscribe.  This means that if you were using &lt;code&gt;mySub.ready()&lt;/code&gt; in a helper function (or another reactive context) and then resubscribe with &lt;code&gt;mySub = Meteor.subscribe(&#39;testdata&#39;, newFilter);&lt;/code&gt; your helper will not rerun.  For this reason I would always recommend putting your subscriptions in &lt;code&gt;Deps.autorun&lt;/code&gt; blocks and having them update by changing the value of Session variables, or another reactive data source.&lt;/li&gt;
   &lt;li&gt;By default, a subscription that runs within a &lt;code&gt;Deps.autorun&lt;/code&gt; will not actually resubscribe if there is no effective change in the subscription request, even if the &lt;code&gt;autorun&lt;/code&gt; block is rerun.  I can’t imagine a scenario in which this behaviour would be undesirable, but if that’s ever the case you could force a resubscription by just including &lt;code&gt;mySub.stop()&lt;/code&gt; before the &lt;code&gt;Meteor.subscribe&lt;/code&gt; line in the &lt;code&gt;autorun&lt;/code&gt; block.&lt;/li&gt;
 &lt;/ul&gt;
 

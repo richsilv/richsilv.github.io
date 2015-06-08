@@ -15,9 +15,9 @@ Conveniently, a recent Meteor project which required proxy routes to file downlo
 
 The Meteor core package [webapp](https://github.com/meteor/meteor/tree/devel/packages/webapp) uses [Connect](https://www.npmjs.com/package/connect) under the hood to serve content to browsers, and it's relatively easy to use [`WebApp.connectHandlers`](https://docs.meteor.com/#/full/webapp) to register server-side routes from which to serve content outside your main web app.
 
-However, extra functionality can be provided by adding the [simple:json-routes](https://github.com/stubailo/meteor-rest/tree/master/packages/json-routes) package by core dev Sashko; ostensibly, its purpose is to allow apps to respond to requests (optionally including json bodies) to respond with json objects.  None of that's required here, but the package also includes [connect-route](https://github.com/baryshev/connect-route), a router for Connect which allows parameters to be passed in the URL.
+However, extra functionality can be provided by adding the [simple:json-routes](https://github.com/stubailo/meteor-rest/tree/master/packages/json-routes) package by core dev Sashko; ostensibly, its purpose is to allow apps to respond to requests (optionally including json bodies) to respond with json objects.  That's not required here, but the package also includes [connect-route](https://github.com/baryshev/connect-route), a really useful router for Connect which allows parameters to be passed in the URL.  Adding connect-route could be achieved independently via [meteorhacks:npm](https://github.com/meteorhacks/npm), but it's much quicker to just add the *simple:json-routes* packages, which itself is designed to be lightweight:
 
-{% highlight shell %}
+{% highlight bash %}
 
 meteor add simple:json-routes
 
@@ -87,7 +87,7 @@ JsonRoutes.add('get', '/file/:name', function(req, res, next) {
 
 {% endhighlight %}
 
-Two things to point out from the above example:
+Two things to point out in the above example:
 
 1. There's no error-handling above, so if the app is unable to find the file in question it will simply throw.
 2. A more realistic example probably wouldn't be reading files from the local filesystem, but more likely from dedicated cloud storage.  However, it's trivial to adapt this code to serve files by creating readable streams from [AWS S3](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#getObject-property) or [Google Cloud Storage](https://googlecloudplatform.github.io/gcloud-node/#/docs/v0.14.0/storage/file?method=createReadStream).  This way, the objects in question can remain both private and hidden, and only accessible to the public via your Meteor API.
