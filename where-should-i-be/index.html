@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where Should I Be?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a friendly coach on the touchline — short, warm, encouraging words for an 8-year-old.
+   IDEA: a coach's tactics board that comes alive: counters slide, then freeze for her decision.
+   PICTURE: a striped 7-a-side pitch filling the top of the screen, with "You" ringed in yellow.
+   COLOUR and TYPE: grass green dominant, blue (us) vs red (them), sunshine yellow accent; Fredoka titles, Nunito body.
+   LAYOUT: modest title strip, pitch, then one calm column of big answer buttons and feedback. */
+:root{color-scheme:light dark;--bg:light-dark(#eef5ec,#0c1610);--ink:light-dark(#10241a,#e7f2e9);--soft:light-dark(#4c6655,#a5bdab);--card:light-dark(#ffffff,#15241b);--line:light-dark(#d3e3d5,#2a3e31);--us:#2563eb;--them:#e03c3c;--me:#ffd23f;--good:light-dark(#e3f6e6,#163a22);--goodInk:light-dark(#17632c,#8fe0a3);--warn:light-dark(#fff4d6,#3a2f12);--warnInk:light-dark(#8a5a00,#ffd27a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;line-height:1.1;margin:0;text-wrap:balance}
+header{background:#0f3d24;color:#fff;padding:14px max(5vw,16px)}
+header .in{max-width:1000px;margin:auto;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+header h1{font-size:clamp(26px,5vw,34px)}header p{margin:0;color:#bfe3c9;font-size:15px}
+main{max-width:1000px;margin:auto;padding:16px max(4vw,12px) 40px}
+.fig{position:relative;aspect-ratio:108/72;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px -12px #0006;background:#2a8240}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);opacity:0;padding:10px 22px;border-radius:16px;font:700 clamp(24px,6vw,44px)/1 Fredoka,sans-serif;color:#fff;background:#10241acc;transition:.25s;pointer-events:none;white-space:nowrap}
+.banner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}.banner.good{background:#178a3acc}.banner.bad{background:#c0392bcc}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--soft);margin:10px 4px 0}
+.legend i{display:inline-block;width:13px;height:13px;border-radius:50%;vertical-align:-1px;margin-right:6px;border:2px solid #fff}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:14px}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14px;color:var(--soft);margin-bottom:10px}
+.tag{font-weight:800;padding:3px 10px;border-radius:99px;color:#fff;background:var(--us)}.tag.def{background:#0f3d24}.tag.set{background:#ffd23f;color:#3b2a00}.tag.pos{background:#7c3aed}
+.dots{display:flex;gap:5px;margin-left:auto}.dots b{width:14px;height:14px;border-radius:50%;border:2px solid var(--line)}
+.dots b.star{background:var(--me);border-color:#d9a800}.dots b.tried{background:var(--line)}.dots b.now{border-color:var(--ink)}
+#q{font-size:clamp(22px,4vw,28px);margin-bottom:14px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 17px/1.25 Nunito,sans-serif;text-align:left;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--us)}.opt:disabled{cursor:default;opacity:.55}.opt.picked{opacity:1;border-color:var(--ink)}
+.opt:focus-visible,.btn:focus-visible{outline:3px solid var(--me);outline-offset:2px}
+.letter{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--me);color:#3b2a00;font:700 17px Fredoka,sans-serif}
+.verb{flex:none;font-size:13px;font-weight:800;padding:3px 9px;border-radius:8px;color:#10241a}
+.v-run{background:#bcd4ff}.v-pass{background:#b7f0dc}.v-shoot{background:#ffc7b8}.v-stay{background:#dde3de}.v-tackle{background:#ffe08a}.v-stand{background:#f3d1ff}.v-clear{background:#ffd9a8}
+.fb{border-radius:14px;padding:14px 16px;margin-top:14px}.fb.good{background:var(--good);color:var(--goodInk)}.fb.bad{background:var(--warn);color:var(--warnInk)}
+.fb h3{font-size:24px;margin-bottom:4px}.fb p{margin:0 0 12px;color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.btn{min-height:48px;padding:10px 20px;border-radius:12px;border:0;font:700 17px Nunito,sans-serif;cursor:pointer;background:#0f3d24;color:#fff}
+.btn.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.tools .btn{min-height:44px;font-size:15px;padding:8px 14px}
+.watch{color:var(--soft);font-weight:700;margin:0}
+.name{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--soft);margin-left:auto}
+.name input{width:9.5em;min-height:44px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 16px Nunito,sans-serif}
+.name input:focus-visible{outline:3px solid var(--me);outline-offset:2px}
+@media(max-width:600px){.name{margin-left:0;width:100%}.name input{flex:1}}
+.halo{transform-box:fill-box;transform-origin:center;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.35);opacity:.35}}
+@media(prefers-reduced-motion:reduce){.halo{animation:none}.banner{transition:none}}
+@media(max-width:600px){.panel{padding:14px}.legend{font-size:13px}}
+</style>
+</head>
+<body>
+<header><div class="in"><h1>Where should I be?</h1><p>Football thinking for 7-a-side</p></div></header>
+<main>
+  <div class="fig" id="fig">
+    <svg id="pitch" viewBox="-4 -4 108 72" aria-label="Football pitch">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffd23f"/></marker>
+        <radialGradient id="light" cx=".5" cy=".35" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></radialGradient>
+      </defs>
+      <rect x="-4" y="-4" width="108" height="72" fill="#267a3b"/>
+      <g id="stripes"></g>
+      <rect x="-4" y="-4" width="108" height="72" fill="url(#light)"/>
+      <g fill="none" stroke="#fff" stroke-opacity=".85" stroke-width=".45">
+        <rect x="0" y="0" width="100" height="64"/>
+        <line x1="50" y1="0" x2="50" y2="64"/><circle cx="50" cy="32" r="8"/>
+        <rect x="0" y="17" width="15" height="30"/><rect x="85" y="17" width="15" height="30"/>
+        <rect x="-2.5" y="27" width="2.5" height="10" fill="#ffffff33"/><rect x="100" y="27" width="2.5" height="10" fill="#ffffff33"/>
+      </g>
+      <circle cx="50" cy="32" r=".7" fill="#fff"/>
+      <g id="arrows"></g><g id="players"></g>
+      <g id="ballG"><ellipse cx=".3" cy="1" rx="1.2" ry=".5" fill="#0005"/><circle r="1.15" fill="#fff" stroke="#10241a" stroke-width=".35"/><path d="M-.45-.35l.45-.35.45.35-.17.5h-.56z" fill="#10241a"/></g>
+    </svg>
+    <div class="banner" id="banner"></div>
+  </div>
+  <div class="legend"><span><i style="background:var(--us)"></i>Your team (attacking this way →)</span><span><i style="background:var(--them)"></i>Other team</span><span><i style="background:var(--us);border-color:var(--me)"></i><b id="legName">You</b> (yellow ring)</span></div>
+
+  <section class="panel" id="panel">
+    <div class="meta"><span class="tag" id="tag"></span><span id="count"></span><span class="dots" id="dots"></span></div>
+    <h2 id="q"></h2>
+    <div class="opts" id="opts"></div>
+    <div id="fb" hidden></div>
+    <div class="tools"><button class="btn alt" id="replay">Watch again</button><button class="btn alt" id="speak" aria-pressed="false">Read aloud: off</button><label class="name">Name on pitch <input id="nameIn" maxlength="12" placeholder="You" autocomplete="off"></label></div>
+  </section>
+</main>
+<script>
+{
+/* ============================================================
+   SCENARIOS — add new ones by copying an entry below.
+   Pitch: x 0 (our goal) → 100 (their goal), y 0 (top touchline) → 64 (bottom).
+   players: id → [x, y]. "me" is always your daughter. Ids starting "o" are the other team;
+            "g" / "ok" are the keepers. Anything else is our team.
+   ball: a player id (she has it) or [x, y] (loose / shot / in the net).
+   lane: optional ['ball', id] — draws a soft white passing lane at question time, so she can
+         see whether the path is open or blocked.
+   view: [centreX, centreY, width] — the close-up the camera zooms into (height follows the pitch shape).
+         Any frame can also have a view to pan the camera mid-scenario.
+   intro: frames played before the question. Each frame: { d: ms, pos: {id:[x,y]}, ball, banner, view }
+          Only list the players that move. Frames run one after another.
+   options: { verb: Run|Pass|Shoot|Stay|Tackle, text, correct, arrow:{from:'me'|'ball', to:[x,y]} or null,
+              outcome: [frames played after she chooses], why: the coaching point }
+   ============================================================ */
+const SCENARIOS = [
+{ kind:'Defending', title:'They attack your side',
+  setup:'You are a defender. Watch the red player with the ball…',
+  q:'The red player is dribbling down YOUR side. What should you do?',
+  players:{g:[5,32],me:[24,18],d2:[24,46],m1:[44,14],m2:[46,32],m3:[44,50],f:[66,32],
+           ok:[95,32],od1:[80,20],od2:[80,44],o1:[60,12],o2:[60,32],o3:[62,52],o4:[40,36]},
+  ball:'o1', view:[30,22,68],
+  intro:[{d:1800,pos:{o1:[40,13],m1:[44,17],o2:[50,30],o4:[32,38],o3:[54,50],m2:[42,32],od1:[70,22],od2:[70,42],f:[60,30]}}],
+  options:[
+    {verb:'Run',text:'Close her down',correct:true,arrow:{from:'me',to:[35,15]},
+     outcome:[{d:900,pos:{me:[34,15],o1:[37,14]}},{d:700,pos:{me:[35,13],o1:[36,11]},banner:'Slowed her down!'}],
+     why:'You are the nearest defender, so it’s your job to go and get close. Stay on your toes and push her towards the side line, away from the goal.'},
+    {verb:'Run',text:'Cover behind the other defender',arrow:{from:'me',to:[16,38]},
+     outcome:[{d:900,pos:{me:[16,38],o1:[30,15],o4:[24,36]}},{d:800,pos:{o1:[17,21]}},{d:500,ball:[-1,30],banner:'Goal for them'}],
+     why:'Covering is the OTHER defender’s job when the ball is on your side. Nobody stopped the dribbler, so she ran straight at goal.'},
+    {verb:'Stay',text:'Stay where you are',arrow:null,
+     outcome:[{d:1000,pos:{o1:[29,15]}},{d:600,pos:{me:[25,17],o1:[19,22]}},{d:500,ball:[-1,34],banner:'Goal for them'}],
+     why:'Standing still gives her lots of time and space. By the time you moved, she was already past you.'}
+  ]},
+{ kind:'Defending', title:'Ball on the other side',
+  setup:'You are a defender again. This time the ball is on the far side…',
+  q:'Your teammate is closing down the dribbler. What is YOUR job?',
+  players:{g:[5,32],me:[24,18],d2:[24,46],m1:[44,14],m2:[46,32],m3:[44,50],f:[66,32],
+           ok:[95,32],od1:[78,20],od2:[78,44],o1:[60,30],o2:[62,14],o3:[60,52],o4:[42,30]},
+  ball:'o3', view:[24,34,78],
+  intro:[{d:1800,pos:{o3:[40,52],m3:[44,47],d2:[32,50],o2:[46,12],o4:[32,30],o1:[48,32],m2:[42,32],od1:[70,20],od2:[70,44]}}],
+  options:[
+    {verb:'Run',text:'Tuck in and cover behind her',correct:true,arrow:{from:'me',to:[17,36]},
+     outcome:[{d:900,pos:{me:[17,36],o3:[32,49],d2:[30,49]}},{d:700,pos:{o3:[22,43],d2:[27,47],me:[20,41]}},{d:600,ball:'me',pos:{o3:[23,44]},banner:'Ball won!'}],
+     why:'When the ball is on the far side, the defender nearest it closes down and you cover behind. If the dribbler gets past, you are there to stop her.'},
+    {verb:'Run',text:'Go and help close down the ball',arrow:{from:'me',to:[32,46]},
+     outcome:[{d:900,pos:{me:[33,46],o3:[37,51],d2:[34,52]}},{d:800,pos:{o2:[30,18]},ball:'o2'},{d:800,pos:{o2:[14,26]}},{d:500,ball:[-1,30],banner:'Goal for them'}],
+     why:'Two of you on one player leaves a big gap. They passed into the space you left behind.'},
+    {verb:'Stay',text:'Stay out wide',arrow:null,
+     outcome:[{d:900,pos:{o3:[32,49],d2:[30,50]}},{d:800,pos:{o3:[16,40],d2:[26,48]}},{d:500,ball:[-1,34],banner:'Goal for them'}],
+     why:'Out wide you were too far away to help. When she got past your teammate, nobody was covering.'}
+  ]},
+{ kind:'Attacking', title:'In on goal',
+  setup:'You are attacking with the ball. Here you go…',
+  q:'You are in the box and only the keeper is in front of you. What now?',
+  players:{g:[5,32],d:[30,20],d2:[30,44],m1:[55,14],m2:[58,42],m3:[50,54],me:[70,28],
+           ok:[95,32],od1:[80,16],od2:[76,40],o1:[62,22],o2:[60,46],o3:[48,30],o4:[40,20]},
+  ball:'me', view:[80,30,60],
+  intro:[{d:1800,pos:{me:[85,30],od2:[81,37],od1:[86,20],ok:[93,31],o1:[73,26],m2:[70,44],m1:[66,14]}}],
+  options:[
+    {verb:'Shoot',text:'Shoot at the corner of the goal',correct:true,arrow:{from:'ball',to:[100,36]},
+     outcome:[{d:600,ball:[101.2,36],pos:{ok:[94,29]},banner:'Goal!'}],
+     why:'You are close and you can see the goal — that’s the moment to shoot! Aim for a corner, away from the keeper.'},
+    {verb:'Pass',text:'Pass back to a teammate',arrow:{from:'ball',to:[70,44]},
+     outcome:[{d:700,ball:'m2'},{d:900,pos:{od2:[73,41],o1:[70,38],od1:[82,30]},banner:'Chance gone'}],
+     why:'Passing back is safe, but you were in a brilliant spot. The defenders got back and the chance was gone.'},
+    {verb:'Run',text:'Dribble out to the corner',arrow:{from:'me',to:[93,9]},
+     outcome:[{d:1000,pos:{me:[91,13],od1:[90,15]}},{d:500,ball:'od1',banner:'Tackled!'}],
+     why:'Running away from goal makes the shot harder and gives defenders time to catch you.'}
+  ]},
+{ kind:'Attacking', title:'Pass or dribble?',
+  setup:'You have the ball out on the wing. Watch the defender…',
+  q:'A defender is rushing at you. Look at your teammate — nobody is near her. What should you do?',
+  players:{g:[5,32],d:[28,20],d2:[28,44],m2:[46,34],m4:[66,50],me:[52,14],f:[62,34],
+           ok:[95,32],od1:[82,14],od2:[82,48],o1:[54,44],o2:[46,56],o3:[40,24],o4:[36,38]},
+  ball:'me', view:[78,28,60], lane:['ball','f'],
+  intro:[{d:1800,pos:{me:[63,14],od1:[70,14.5],f:[73,30],m4:[74,50],od2:[80,49],o1:[56,44],m2:[52,36]}}],
+  options:[
+    {verb:'Pass',text:'Pass to your free teammate',correct:true,arrow:{from:'ball',to:[73,30]},
+     outcome:[{d:700,ball:'f',pos:{od1:[67,15]}},{d:800,pos:{f:[84,32],od2:[84,43]}},{d:500,ball:[101.2,37],pos:{ok:[95,29]},banner:'Goal!'}],
+     why:'There were no red players between you and your teammate, so the path was clear. When the path is clear and a defender is coming, pass!'},
+    {verb:'Shoot',text:'Shoot from here',arrow:{from:'ball',to:[100,30]},
+     outcome:[{d:1000,ball:'ok',banner:'Easy save'}],
+     why:'You are a long way from goal. The keeper had lots of time to see it coming and made an easy save.'},
+    {verb:'Run',text:'Keep dribbling',arrow:{from:'me',to:[69,14]},
+     outcome:[{d:700,pos:{me:[68,14],od1:[69.5,14]}},{d:500,ball:'od1',banner:'Tackled!'}],
+     why:'Dribbling straight into a defender usually loses the ball. Look up first — is a teammate free?'}
+  ]},
+{ kind:'Attacking', title:'Get free for a pass',
+  setup:'Your teammate has the ball. Where are you?',
+  q:'Your teammate wants to pass to you, but a red player is standing in the way. What should you do?',
+  players:{g:[5,32],d:[24,20],d2:[24,44],m1:[36,50],m2:[34,22],me:[64,34],f:[80,52],
+           ok:[95,32],od1:[84,24],od2:[86,44],o1:[59,37.3],o2:[78,12],o3:[28,58],o4:[76,50]},
+  ball:'m1', view:[54,33,66], lane:['ball','me'],
+  intro:[{d:1600,pos:{m1:[40,50],o3:[34,56]}}],
+  options:[
+    {verb:'Run',text:'Move into space so she can see you',correct:true,arrow:{from:'me',to:[58,20]},
+     outcome:[{d:800,pos:{me:[58,20],o1:[60,34]}},{d:700,ball:'me'},{d:800,pos:{me:[68,20]},banner:'Pass received!'}],
+     why:'When a red player is between you and the ball, the pass can’t get through. You moved to where nobody was in the way — a clear path for the pass.'},
+    {verb:'Stay',text:'Stay where you are',arrow:null,
+     outcome:[{d:700,ball:'o1',banner:'Intercepted!'}],
+     why:'The red player was standing right between you and the ball, so the pass was easy to cut out.'},
+    {verb:'Run',text:'Run to your teammate',arrow:{from:'me',to:[47,46]},
+     outcome:[{d:900,pos:{me:[47,46],o1:[49,44]}},{d:600,pos:{o3:[39,52]},ball:'o3',banner:'Too crowded!'}],
+     why:'Running to the ball crowds the space and brings defenders with you. Spread out and give your teammate a clear pass.'}
+  ]},
+/* ---------- set pieces & positioning ---------- */
+{ kind:'Corner', title:'Our corner: push up',
+  setup:"We've won a corner! You're one of our two defenders.",
+  q:"Your defender partner is staying back. Where should YOU go?",
+  players:{g:[6,32],me:[30,30],d2:[30,44],m1:[99.3,0.8],m2:[88,24],m3:[90,40],f:[92,32],
+           ok:[98,32],od1:[93,27],od2:[92,38],o1:[88,33],o2:[86,21],o3:[72,30],o4:[60,38]},
+  ball:'m1', view:[50,32,108],
+  intro:[{d:1400,pos:{d2:[38,42],o3:[74,30],o4:[57,36]}}],
+  options:[
+    {verb:'Stand',text:'Push right up to the halfway line',correct:true,arrow:{from:'me',to:[50,22]},
+     outcome:[{d:900,pos:{me:[50,22]}},{d:600,ball:[90,30]},{d:700,ball:[57,25],pos:{o4:[57,31]}},{d:600,pos:{me:[55.5,24]},ball:'me',banner:'Won it back!'}],
+     why:"When we have a corner, one defender pushes right up to the halfway line. If they kick it clear, you're there to win it back and keep the pressure on."},
+    {verb:'Stand',text:'Stay on the edge of our box',arrow:{from:'me',to:[17,28]},
+     outcome:[{d:900,pos:{me:[17,28]}},{d:600,ball:[90,30]},{d:700,ball:[58,28],pos:{o4:[58,31]}},{d:900,ball:'o4',pos:{o4:[42,28]},banner:'They break away'}],
+     why:"Way back there you're too far away to help. Their player got the clearance with loads of space. Push up to the halfway line."},
+    {verb:'Run',text:'Go into the box to help with the corner',arrow:{from:'me',to:[83,38]},
+     outcome:[{d:900,pos:{me:[83,38]}},{d:600,ball:[90,30]},{d:700,ball:[58,28],pos:{o4:[58,31]}},{d:900,ball:'o4',pos:{o4:[40,34],d2:[38,36]},banner:'Counter-attack!'}],
+     why:"Defenders don't go into the box at corners. With you up there, only one defender was left at the back when they cleared it."}
+  ]},
+{ kind:'Corner', title:'Our corner: the back defender',
+  setup:"We've won a corner! You're one of our two defenders.",
+  q:"Your defender partner has pushed up to the halfway line. Where should YOU stand?",
+  players:{g:[6,32],me:[28,26],d1:[30,42],m1:[99.3,0.8],m2:[88,24],m3:[90,40],f:[92,32],
+           ok:[98,32],od1:[93,27],od2:[92,38],o1:[88,33],o2:[86,21],o3:[72,30],o4:[60,30]},
+  ball:'m1', view:[50,32,108],
+  intro:[{d:1400,pos:{d1:[50,38],o4:[58,30]}}],
+  options:[
+    {verb:'Stand',text:'A little way behind her',correct:true,arrow:{from:'me',to:[39,30]},
+     outcome:[{d:900,pos:{me:[39,30]}},{d:600,ball:[90,30]},{d:800,ball:[42,32],pos:{o4:[50,31]}},{d:500,pos:{me:[41,31]},ball:'me',banner:'Safe!'}],
+     why:"One defender on the halfway line, and you a little way behind to cover. If they kick it long over her head, you're there."},
+    {verb:'Stand',text:'Level with her on the halfway line',arrow:{from:'me',to:[50,26]},
+     outcome:[{d:900,pos:{me:[50,26]}},{d:600,ball:[90,30]},{d:800,ball:[38,32],pos:{o4:[48,31]}},{d:900,pos:{o4:[22,32]},ball:'o4'},{d:500,ball:[-1,31],banner:'Goal for them'}],
+     why:"If you're both on the halfway line, one long kick goes over you both and nobody is covering. Stay a little way behind."},
+    {verb:'Stand',text:'On the edge of our box',arrow:{from:'me',to:[17,28]},
+     outcome:[{d:900,pos:{me:[17,28]}},{d:600,ball:[90,30]},{d:800,ball:[44,32],pos:{o4:[46,31]}},{d:900,ball:'o4',pos:{o4:[34,32]},banner:'Too far back'}],
+     why:"There's no red striker near our goal, so you don't need to be that deep. Stay closer to your partner so you can pick up the clearance."}
+  ]},
+{ kind:'Corner', title:'Our corner: watch their striker',
+  setup:"We've won a corner — but look who's hanging around near OUR goal…",
+  q:"Their striker has stayed near our goal. Your partner is on the halfway line. Where should you stand?",
+  players:{g:[6,32],me:[34,24],d1:[34,42],m1:[99.3,0.8],m2:[88,24],m3:[90,40],f:[92,32],
+           ok:[98,32],od1:[93,27],od2:[92,38],o1:[88,33],o2:[86,21],o3:[72,30],o4:[34,40]},
+  ball:'m1', view:[50,32,108],
+  intro:[{d:1500,pos:{d1:[50,30],o4:[25,39]}}],
+  options:[
+    {verb:'Stand',text:'Next to their striker, between her and our goal',correct:true,arrow:{from:'me',to:[21,37]},
+     outcome:[{d:900,pos:{me:[21,37]}},{d:600,ball:[90,30]},{d:900,ball:[24,39]},{d:400,ball:'me',banner:'Got there first!'}],
+     why:"If their striker stays near our goal, you stay with her — on the goal side, so you can reach the ball first."},
+    {verb:'Stand',text:'Push up to the halfway line too',arrow:{from:'me',to:[50,40]},
+     outcome:[{d:900,pos:{me:[50,40]}},{d:600,ball:[90,30]},{d:900,ball:[28,40]},{d:900,ball:'o4',pos:{o4:[12,34]}},{d:500,ball:[-1,31],banner:'Goal for them'}],
+     why:"With both of you up the pitch, their striker had nobody near her. One long kick and she was through."},
+    {verb:'Stand',text:'A little way behind the halfway line',arrow:{from:'me',to:[39,30]},
+     outcome:[{d:900,pos:{me:[39,30]}},{d:600,ball:[90,30]},{d:900,ball:[25,42]},{d:900,ball:'o4',pos:{o4:[12,36]}},{d:500,ball:[-1,32],banner:'Goal for them'}],
+     why:"That's usually right — but their striker was behind you. When a striker lurks near our goal, stay with her."}
+  ]},
+{ kind:'Corner', title:'Their corner: where does the striker go?',
+  setup:"They have a corner at our end. You're our striker.",
+  q:"They're taking a corner by our goal. You're the striker. Where should you wait?",
+  players:{g:[3,32],d1:[7,26],d2:[8,38],m1:[11,30],m2:[13,42],m3:[16,22],me:[30,30],
+           ok:[95,32],od1:[58,32],od2:[70,30],o1:[0.7,0.8],o2:[8,30],o3:[10,35],o4:[6,24]},
+  ball:'o1', view:[50,32,108],
+  intro:[{d:1200,pos:{o2:[7,31],o3:[9,36],od1:[56,32]}}],
+  options:[
+    {verb:'Stand',text:'Up near the halfway line',correct:true,arrow:{from:'me',to:[49,26]},
+     outcome:[{d:900,pos:{me:[49,26]}},{d:600,ball:'g'},{d:1000,ball:[60,24]},{d:700,pos:{me:[60,24],od1:[58,29]},ball:'me'},{d:800,pos:{me:[74,26]},banner:'Counter-attack!'}],
+     why:"Strikers stay up! When our keeper or defenders win the ball, you're the one they can kick it to."},
+    {verb:'Run',text:'Back into our box to help',arrow:{from:'me',to:[14,30]},
+     outcome:[{d:900,pos:{me:[14,30]}},{d:600,ball:'g'},{d:1000,ball:[56,28]},{d:500,ball:'od1',banner:'Nobody up front'}],
+     why:"Our defenders and keeper look after the corner. If you come back too, there's nobody up front to kick the ball to."},
+    {verb:'Stay',text:'Stay in the middle of our half',arrow:null,
+     outcome:[{d:600,ball:'g'},{d:1000,ball:[56,28]},{d:500,ball:'od1',banner:'Too deep'}],
+     why:"That's too far back for a striker. Wait near the halfway line, ready for the long kick."}
+  ]},
+{ kind:'Positioning', title:'Striker when we defend',
+  setup:"The other team is attacking our goal. You're our striker.",
+  q:"They're attacking our goal. You're the striker. Where should you be?",
+  players:{g:[4,32],d1:[16,24],d2:[16,42],m1:[26,18],m2:[30,34],m3:[28,48],me:[44,32],
+           ok:[95,32],od1:[60,26],od2:[62,44],o1:[30,20],o2:[24,36],o3:[30,50],o4:[18,30]},
+  ball:'o1', view:[38,32,84],
+  intro:[{d:1500,pos:{o1:[22,20],d1:[19,21],m1:[24,18],o4:[16,30],od1:[58,28]}}],
+  options:[
+    {verb:'Stand',text:'Near the halfway line, in space',correct:true,arrow:{from:'me',to:[50,38]},
+     outcome:[{d:800,pos:{me:[50,38]}},{d:500,pos:{d1:[21,20]},ball:'d1',banner:'Tackle!'},{d:1000,ball:[54,38]},{d:500,ball:'me'},{d:800,pos:{me:[66,38]},banner:'Counter-attack!'}],
+     why:"Our defenders do the defending. You wait in space near the halfway line, so when we win the ball there's someone to kick it to."},
+    {verb:'Run',text:'Run back to help defend',arrow:{from:'me',to:[24,28]},
+     outcome:[{d:900,pos:{me:[24,28]}},{d:500,pos:{d1:[21,20]},ball:'d1',banner:'Tackle!'},{d:1000,ball:[54,34]},{d:500,ball:'od1',banner:'Came straight back'}],
+     why:"With everyone back, our clearance went straight to their defender and they attacked again. A striker stays up the pitch."},
+    {verb:'Run',text:'Chase the player with the ball',arrow:{from:'me',to:[26,22]},
+     outcome:[{d:900,pos:{me:[26,22]}},{d:500,pos:{d1:[21,20]},ball:'d1',banner:'Tackle!'},{d:1000,ball:[54,34]},{d:500,ball:'od1',banner:'Came straight back'}],
+     why:"Your teammates were already there. Chasing back crowds the space and leaves nobody up front for the clearance."}
+  ]},
+{ kind:'Goal kick', title:'Our goal kick',
+  setup:"Our keeper has a goal kick. You're a defender.",
+  q:"Our keeper is taking a goal kick. Where should you go?",
+  players:{g:[5,32],me:[15,29],d2:[15,36],m1:[30,16],m2:[34,32],m3:[30,48],f:[52,32],
+           ok:[95,32],od1:[66,24],od2:[66,42],o1:[46,16],o2:[44,34],o3:[46,50],o4:[38,30]},
+  ball:'g', view:[30,29,72],
+  intro:[{d:1400,pos:{d2:[14,56],o4:[34,30]}}],
+  options:[
+    {verb:'Stand',text:'Out wide, near the side of the pitch',correct:true,arrow:{from:'me',to:[14,11]},
+     outcome:[{d:900,pos:{me:[14,11]}},{d:700,ball:'me'},{d:800,pos:{me:[26,10]},banner:'Lots of space!'}],
+     why:"Spread out wide when our keeper has the ball. You get time and space, and if anything goes wrong it's far from our goal."},
+    {verb:'Stand',text:'Right next to the keeper',arrow:{from:'me',to:[9,38]},
+     outcome:[{d:800,pos:{me:[9,38]}},{d:600,ball:'me',pos:{o4:[16,37]}},{d:500,pos:{o4:[10.5,38]},ball:'o4',banner:'Under pressure!'}],
+     why:"Standing next to the keeper means one red player can close you both down at once. Get wide!"},
+    {verb:'Stay',text:'Stay in front of our goal',arrow:null,
+     outcome:[{d:600,ball:'me',pos:{o4:[22,30]}},{d:500,pos:{o4:[16.5,29.5]},ball:'o4'},{d:500,ball:[-1,33],banner:'Goal for them'}],
+     why:"Losing the ball right in front of our own goal is dangerous. Get wide, where it's safe."}
+  ]},
+{ kind:'Throw-in', title:'Our throw: get free',
+  setup:"We have a throw-in. A red player is standing right next to you.",
+  q:"Your teammate wants to throw it to you, but you're being marked. What should you do?",
+  players:{g:[5,32],d1:[30,22],d2:[32,44],m1:[70,64.6],m2:[56,40],me:[71,52],f:[84,40],
+           ok:[95,32],od1:[86,30],od2:[86,48],o1:[60,52],o2:[72.5,50],o3:[64,36],o4:[54,28]},
+  ball:'m1', view:[72,52,52],
+  intro:[{d:1200,pos:{o1:[62,54],m2:[58,42]}}],
+  options:[
+    {verb:'Run',text:'Sprint away from her into space',correct:true,arrow:{from:'me',to:[81,54]},
+     outcome:[{d:800,pos:{me:[81,54],o2:[76,52]}},{d:600,ball:'me'},{d:700,pos:{me:[86,52]},banner:'Free!'}],
+     why:"Standing still makes you easy to mark. A quick sprint into space gives the thrower a clear target."},
+    {verb:'Stay',text:'Stay where you are',arrow:null,
+     outcome:[{d:700,ball:'o2',banner:'Intercepted!'}],
+     why:"With a red player right next to you, the throw was easy to steal. Move away from your marker!"},
+    {verb:'Run',text:'Stand right next to the thrower',arrow:{from:'me',to:[65,61]},
+     outcome:[{d:700,pos:{me:[65,61],o2:[66.5,59]}},{d:500,ball:'me'},{d:500,pos:{o2:[65.5,60.5]},ball:'o2',banner:'Trapped!'}],
+     why:"Right by the line you have nowhere to go, and your marker just followed you. Find space away from her."}
+  ]},
+{ kind:'Defending', title:'Their throw: mark the free player',
+  setup:"They have a throw-in near our goal. Look at the red players…",
+  q:"One red player near our goal has nobody marking her. What should you do?",
+  players:{g:[3,32],me:[24,22],d2:[15,36],m1:[25,8],m2:[34,30],m3:[30,46],f:[52,32],
+           ok:[95,32],od1:[66,24],od2:[66,42],o1:[20,-0.6],o2:[27,6],o3:[18,37],o4:[12,20]},
+  ball:'o1', view:[26,20,62],
+  intro:[{d:1200,pos:{o4:[11,19],o3:[17,38]}}],
+  options:[
+    {verb:'Stand',text:'Mark her, on the goal side',correct:true,arrow:{from:'me',to:[8,22]},
+     outcome:[{d:900,pos:{me:[8,22]}},{d:700,ball:'me',banner:'Got there first!'}],
+     why:"An unmarked player near our goal is the most dangerous one. Get close to her, between her and the goal."},
+    {verb:'Run',text:'Go and block the thrower',arrow:{from:'me',to:[20,4]},
+     outcome:[{d:900,pos:{me:[20,4]}},{d:600,ball:'o4'},{d:500,ball:[-1,30],banner:'Goal for them'}],
+     why:"The thrower can't score from the side line. The free player near goal was the danger."},
+    {verb:'Stay',text:'Stay where you are',arrow:null,
+     outcome:[{d:600,ball:'o4'},{d:500,ball:[-1,30],banner:'Goal for them'}],
+     why:"Nobody was marking the red player near our goal, so the throw went straight to her."}
+  ]},
+{ kind:'Positioning', title:'Stay wide',
+  setup:"Your team has the ball on the far side of the pitch.",
+  q:"Your teammate has the ball over on the other side. Where should you be?",
+  players:{g:[5,32],d1:[34,22],d2:[36,42],m1:[58,10],m2:[48,30],me:[60,46],f:[74,30],
+           ok:[95,32],od1:[82,24],od2:[82,40],o1:[66,12],o2:[52,18],o3:[56,32],o4:[44,36]},
+  ball:'m1', view:[66,32,72], lane:null,
+  intro:[{d:1300,pos:{m1:[60,10],o1:[64,11],o2:[54,15]}}],
+  options:[
+    {verb:'Stand',text:'Stay wide on your side',correct:true,arrow:{from:'me',to:[64,57]},
+     outcome:[{d:800,pos:{me:[64,57]}},{d:800,ball:'me'},{d:800,pos:{me:[78,56]},banner:'Loads of space!'}],
+     why:"Staying wide makes the pitch big. Your teammate can switch the ball to you, far away from the crowd of red players."},
+    {verb:'Run',text:'Go over to the ball',arrow:{from:'me',to:[58,18]},
+     outcome:[{d:900,pos:{me:[58,18],o3:[58,22]}},{d:500,pos:{o1:[61,10.5]},ball:'o1',banner:'Too crowded!'}],
+     why:"Going to the ball brings more red players with you. Stay wide and give your teammate an easy pass."},
+    {verb:'Run',text:'Run into the middle next to our striker',arrow:{from:'me',to:[71,34]},
+     outcome:[{d:900,pos:{me:[71,34]}},{d:500,pos:{o1:[61,10.5]},ball:'o1',banner:'No space'}],
+     why:"Two of you in the same spot means one red player can mark you both. Spread out!"}
+  ]},
+/* ---------- decisions ---------- */
+{ kind:'Defending', title:'Clear it!',
+  setup:"The ball is near our goal and a red player is chasing you…",
+  q:"You've got the ball near our goal and a red player is right on you. What should you do?",
+  players:{g:[3,33],me:[11,24],d2:[12,42],m1:[38,6],m2:[30,30],m3:[30,48],f:[52,30],
+           ok:[95,32],od1:[66,24],od2:[66,42],o1:[34,14],o2:[17,37],o3:[36,44],o4:[22,22]},
+  ball:'me', view:[24,24,66],
+  intro:[{d:1200,pos:{o4:[14.5,23],o2:[15,36]}}],
+  options:[
+    {verb:'Clear',text:'Kick it hard, out wide and up the pitch',correct:true,arrow:{from:'ball',to:[38,6]},
+     outcome:[{d:800,ball:'m1'},{d:700,pos:{m1:[48,6]},banner:'Cleared!'}],
+     why:"When you're under pressure near our goal, safety first! Kick it away from the goal, out wide and up the pitch."},
+    {verb:'Run',text:'Dribble across in front of our goal',arrow:{from:'me',to:[11,34]},
+     outcome:[{d:700,pos:{me:[11,30],o4:[12,29]}},{d:400,ball:'o4'},{d:500,ball:[-1,32],banner:'Goal for them'}],
+     why:"Dribbling across your own goal is risky. If you lose it there, they're right in front of goal."},
+    {verb:'Pass',text:'Pass across our box to your teammate',arrow:{from:'ball',to:[12,42]},
+     outcome:[{d:500,ball:'o2'},{d:500,ball:[-1,34],banner:'Goal for them'}],
+     why:"A pass across your own box can be cut out — and then they're right in front of goal. Clear it wide instead."}
+  ]},
+{ kind:'Defending', title:'Get goal-side',
+  setup:"Uh oh — we've just lost the ball in the middle.",
+  q:"We've lost the ball. The red player near you is running towards our goal. What should you do?",
+  players:{g:[5,32],d1:[26,20],d2:[26,44],m1:[52,16],me:[60,44],m3:[50,30],f:[72,32],
+           ok:[95,32],od1:[80,24],od2:[80,42],o1:[56,20],o2:[56,40],o3:[66,30],o4:[40,30]},
+  ball:'o1', view:[44,34,72],
+  intro:[{d:1400,pos:{o2:[48,41],m1:[54,18],o1:[54,20],o4:[36,28],d1:[28,24]}}],
+  options:[
+    {verb:'Run',text:'Sprint back between her and our goal',correct:true,arrow:{from:'me',to:[37,42]},
+     outcome:[{d:1000,pos:{me:[38,42],o2:[43,41],o1:[52,21]}},{d:700,ball:'me',banner:'Intercepted!'}],
+     why:"When we lose the ball, get back between your player and our goal — 'goal-side'. Then you can stop the pass or the run."},
+    {verb:'Stay',text:'Stay where you are',arrow:null,
+     outcome:[{d:1000,pos:{o2:[34,42],o1:[52,21]}},{d:700,ball:'o2'},{d:900,pos:{o2:[16,38]}},{d:500,ball:[-1,34],banner:'Goal for them'}],
+     why:"She ran past you towards our goal and was completely free. Get back goal-side!"},
+    {verb:'Run',text:'Chase the player with the ball',arrow:{from:'me',to:[56,25]},
+     outcome:[{d:1000,pos:{me:[56,25],o2:[34,42],o1:[52,21]}},{d:700,ball:'o2'},{d:900,pos:{o2:[16,38]}},{d:500,ball:[-1,34],banner:'Goal for them'}],
+     why:"Your teammate was already closing down the ball. You left your player free to run at goal."}
+  ]},
+{ kind:'Defending', title:'Tackle time',
+  setup:"You're facing a red dribbler. Watch her touch…",
+  q:"She's kicked the ball too far in front of her! What should you do?",
+  players:{g:[4,32],me:[25,30],d2:[24,46],m1:[44,14],m2:[48,32],m3:[46,50],f:[64,32],
+           ok:[95,32],od1:[78,24],od2:[78,42],o1:[42,30],o2:[46,18],o3:[50,46],o4:[34,40]},
+  ball:'o1', view:[32,32,54],
+  intro:[{d:1100,pos:{o1:[35,30],me:[27,30]}},{d:450,ball:[30,30.5]}],
+  options:[
+    {verb:'Tackle',text:'Tackle now — the ball is loose!',correct:true,arrow:{from:'me',to:[30,30.5]},
+     outcome:[{d:500,pos:{me:[29,30],o1:[33,30]}},{d:300,ball:'me'},{d:700,ball:'m1',banner:'Great tackle!'}],
+     why:"When a dribbler takes a big touch, the ball is nobody's for a moment. That's the perfect time to tackle!"},
+    {verb:'Stay',text:'Wait for her to come to you',arrow:null,
+     outcome:[{d:500,pos:{o1:[29.5,30]},ball:'o1'},{d:800,pos:{o1:[16,26],me:[22,28]}},{d:500,ball:[-1,31],banner:'Goal for them'}],
+     why:"Waiting gave her time to get the ball back under control and dribble past you."},
+    {verb:'Run',text:'Run back towards our goal',arrow:{from:'me',to:[15,30]},
+     outcome:[{d:600,pos:{me:[17,30],o1:[30,30]},ball:'o1'},{d:800,pos:{o1:[20,24]}},{d:500,ball:[-1,30],banner:'Goal for them'}],
+     why:"The ball was right in front of you! Running away gave it straight back to her."}
+  ]},
+{ kind:'Attacking', title:'Square it',
+  setup:"You're through on goal! But here comes the keeper…",
+  q:"The keeper is rushing at you, and your teammate is free by the goal. What should you do?",
+  players:{g:[5,32],d1:[30,22],d2:[30,42],m1:[56,14],m2:[60,40],me:[76,24],f:[80,40],
+           ok:[97,32],od1:[78,19],od2:[72,52],o1:[60,24],o2:[52,44],o3:[48,30],o4:[40,22]},
+  ball:'me', view:[80,32,52], lane:['ball','f'],
+  intro:[{d:1500,pos:{me:[86,25],ok:[92,24],f:[90,41],od1:[83,21],od2:[78,52]}}],
+  options:[
+    {verb:'Pass',text:'Pass across to your teammate',correct:true,arrow:{from:'ball',to:[90,41]},
+     outcome:[{d:600,ball:'f',pos:{ok:[90,26]}},{d:400,ball:[101.2,36],banner:'Goal!'}],
+     why:"The keeper came to you, so the goal was empty for your teammate. Nobody was in the way of the pass — easy goal!"},
+    {verb:'Shoot',text:'Shoot anyway',arrow:{from:'ball',to:[100,30]},
+     outcome:[{d:500,pos:{ok:[89,25]},ball:'ok',banner:'Saved!'}],
+     why:"The keeper was right in front of you, blocking the goal. Your teammate had an open goal."},
+    {verb:'Run',text:'Try to dribble round the keeper',arrow:{from:'me',to:[92,17]},
+     outcome:[{d:600,pos:{me:[90,20],ok:[91,21]}},{d:400,ball:'ok',banner:'Smothered!'}],
+     why:"Dribbling round a keeper who's rushing out is really hard. Your teammate had the easier chance."}
+  ]},
+{ kind:'Attacking', title:'Get in the box',
+  setup:"Your teammate is racing down the wing with the ball. You're our striker.",
+  q:"Your teammate is about to cross the ball. Where should you run?",
+  players:{g:[5,32],d1:[36,24],d2:[38,42],m1:[72,4],m2:[60,30],m3:[58,50],me:[68,30],
+           ok:[97,32],od1:[82,22],od2:[86,42],o1:[66,10],o2:[56,40],o3:[50,24],o4:[46,32]},
+  ball:'m1', view:[80,22,58],
+  intro:[{d:1500,pos:{m1:[84,5],o1:[78,8],me:[72,30]}}],
+  options:[
+    {verb:'Run',text:'Into the middle of the box',correct:true,arrow:{from:'me',to:[90,32]},
+     outcome:[{d:800,pos:{me:[90,32]}},{d:700,ball:'me'},{d:400,ball:[101.2,35],banner:'Goal!'}],
+     why:"When the ball is out wide, the striker gets into the middle of the box. That's where the cross is going!"},
+    {verb:'Run',text:'Run over to help your teammate',arrow:{from:'me',to:[82,10]},
+     outcome:[{d:800,pos:{me:[82,10]}},{d:700,ball:[92,32]},{d:300,pos:{ok:[93,32]},ball:'ok',banner:'Nobody there'}],
+     why:"With you out wide too, there was nobody in the box to get on the end of the cross."},
+    {verb:'Stay',text:'Wait outside the box',arrow:null,
+     outcome:[{d:700,ball:[90,32]},{d:400,pos:{od2:[89,34]},ball:'od2',banner:'Cleared'}],
+     why:"Outside the box you were too far away. The defender got there first. Get into the box!"}
+  ]},
+{ kind:'Attacking', title:'Switch it',
+  setup:"You've got the ball in the middle. Look around you…",
+  q:"Lots of red players are near you, and your teammate on the other side is all alone. What should you do?",
+  players:{g:[5,32],d1:[30,22],d2:[30,42],me:[48,14],m2:[44,32],m3:[58,50],f:[70,32],
+           ok:[95,32],od1:[78,26],od2:[80,40],o1:[60,12],o2:[46,22],o3:[62,20],o4:[38,34]},
+  ball:'me', view:[58,32,70], lane:['ball','m3'],
+  intro:[{d:1400,pos:{me:[52,14],o1:[57,12],o2:[48,20],o3:[60,19],m3:[62,50]}}],
+  options:[
+    {verb:'Pass',text:'Pass across to your free teammate',correct:true,arrow:{from:'ball',to:[62,50]},
+     outcome:[{d:900,ball:'m3'},{d:900,pos:{m3:[78,50]},banner:'Loads of space!'}],
+     why:"When it's crowded on your side, switch the ball to the other side where there's space. Nobody was in the way of the pass."},
+    {verb:'Run',text:'Dribble through them',arrow:{from:'me',to:[58,14]},
+     outcome:[{d:600,pos:{me:[55,14],o1:[56,13]}},{d:400,ball:'o1',banner:'Tackled!'}],
+     why:"Three red players were around you. Dribbling into a crowd usually loses the ball."},
+    {verb:'Shoot',text:'Shoot from here',arrow:{from:'ball',to:[100,30]},
+     outcome:[{d:1100,ball:'ok',banner:'Way too far!'}],
+     why:"You were near the halfway line — much too far to score. Look for the free teammate."}
+  ]}
+
+];
+
+/* ============ engine ============ */
+const $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
+const svgEl=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+const lerp=(a,b,e)=>[a[0]+(b[0]-a[0])*e,a[1]+(b[1]-a[1])*e];
+const ease=k=>k<.5?2*k*k:1-(-2*k+2)**2/2;
+const team=id=>id==='me'?'me':id==='g'?'gk':id==='ok'?'ogk':id[0]==='o'?'them':'us';
+const FILL={me:'#2563eb',us:'#2563eb',them:'#e03c3c',gk:'#f59f00',ogk:'#8b5cf6'};
+let stars=[];const ROUND_SIZE=5;let round=[];
+let idx=0,S,st,els={},token=0,order=[],tries=0,frozen,speakOn=false,tone='';
+const FULL=[50,32,108];let cam=[...FULL];
+let myName='';try{myName=localStorage.getItem('wsib-name')||''}catch(e){}
+const label=()=>myName.trim()||'You';
+/* keep the camera inside the drawn area, at the pitch's 3:2 shape */
+function fit(v){const w=Math.min(108,v[2]),h=w/1.5;return[Math.min(Math.max(v[0],-4+w/2),104-w/2),Math.min(Math.max(v[1],-4+h/2),68-h/2),w]}
+/* sprites shrink a little as we zoom in so they stay a comfortable size */
+const kOf=v=>Math.max(.62,Math.sqrt(v[2]/108));
+
+for(let i=0;i<10;i++)$('stripes').appendChild(svgEl('rect',{x:i*10,y:-4,width:10,height:72,fill:i%2?'#2c8a44':'#29813f'}));
+
+function ballXY(b,pos){if(typeof b!=='string')return b;const k=kOf(cam);return[pos[b][0]+1.7*k,pos[b][1]+1.5*k]}
+function render(pos,b,v=cam){
+  cam=v;const w=v[2],h=w/1.5,k=kOf(v);
+  $('pitch').setAttribute('viewBox',`${v[0]-w/2} ${v[1]-h/2} ${w} ${h}`);
+  for(const id in els)els[id].setAttribute('transform',`translate(${pos[id][0]} ${pos[id][1]}) scale(${k})`);
+  $('ballG').setAttribute('transform',`translate(${b[0]} ${b[1]}) scale(${k})`);
+}
+function setTag(){
+  const p=els.me;if(!p)return;p.querySelector('.tag')?.remove();
+  const t=label(),g=svgEl('g',{class:'tag'}),w=t.length*1.85+3.2;
+  g.appendChild(svgEl('rect',{x:-w/2,y:3.7,width:w,height:4.2,rx:2.1,fill:'#ffd23f',stroke:'#10241a','stroke-width':.35}));
+  const tx=svgEl('text',{y:6.95,'text-anchor':'middle','font-size':3.1,'font-weight':700,fill:'#10241a','font-family':'Fredoka,sans-serif'});
+  tx.textContent=t;g.appendChild(tx);p.appendChild(g);$('legName').textContent=t;
+}
+function build(){
+  const g=$('players');g.innerHTML='';els={};
+  const ids=Object.keys(S.players).sort((a,b)=>(a==='me')-(b==='me'));
+  for(const id of ids){
+    const t=team(id),p=svgEl('g',{});
+    p.appendChild(svgEl('ellipse',{cx:.4,cy:2.3,rx:2.4,ry:.9,fill:'#0004'}));
+    if(t==='me')p.appendChild(svgEl('circle',{r:4.3,fill:'#ffd23f',opacity:.35,class:'halo'}));
+    p.appendChild(svgEl('circle',{r:t==='me'?2.9:2.5,fill:FILL[t],stroke:t==='me'?'#ffd23f':'#fff','stroke-width':t==='me'?1.1:.5}));
+    p.appendChild(svgEl('circle',{cx:-.7,cy:-.8,r:.9,fill:'#fff',opacity:.3}));
+    g.appendChild(p);els[id]=p;
+  }
+  setTag();
+}
+function banner(t){const b=$('banner');b.textContent=t;b.className='banner on '+tone;setTimeout(()=>b.className='banner',1400)}
+function play(frames,cb){
+  const my=++token;let i=0;
+  const next=()=>{
+    if(my!==token)return;
+    if(i>=frames.length){cb&&cb();return}
+    const f=frames[i++],from=st.pos,to={...from};
+    for(const id in f.pos||{})to[id]=f.pos[id];
+    const nb=f.ball!==undefined?f.ball:st.ball,b0=ballXY(st.ball,from);
+    const follow=nb===st.ball&&typeof nb==='string',t0=performance.now();
+    const v0=[...cam],v1=f.view?fit(f.view):v0;
+    const tick=now=>{
+      if(my!==token)return;
+      const k=Math.min(1,(now-t0)/f.d),e=ease(k),cur={};
+      for(const id in to)cur[id]=lerp(from[id],to[id],e);
+      cam=[v0[0]+(v1[0]-v0[0])*e,v0[1]+(v1[1]-v0[1])*e,v0[2]+(v1[2]-v0[2])*e];
+      const bt=ballXY(nb,cur);render(cur,follow?bt:lerp(b0,bt,k));
+      if(k<1)requestAnimationFrame(tick);
+      else{st={pos:to,ball:nb};if(f.banner)banner(f.banner);setTimeout(next,f.banner?1100:60)}
+    };
+    requestAnimationFrame(tick);
+  };
+  next();
+}
+function say(t){if(!speakOn)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;speechSynthesis.speak(u)}catch(e){}}
+function clone(s){return{pos:Object.fromEntries(Object.entries(s.pos).map(([k,v])=>[k,[...v]])),ball:Array.isArray(s.ball)?[...s.ball]:s.ball,cam:[...cam]}}
+
+function drawArrows(){
+  const a=$('arrows'),k=kOf(cam);a.innerHTML='';
+  if(S.lane){const p=S.lane.map(id=>id==='ball'?ballXY(st.ball,st.pos):st.pos[id]);
+    a.appendChild(svgEl('line',{x1:p[0][0],y1:p[0][1],x2:p[1][0],y2:p[1][1],stroke:'#fff','stroke-opacity':.32,'stroke-width':3.4*k,'stroke-linecap':'round'}))}
+  order.forEach((oi,n)=>{
+    const o=S.options[oi],L='ABC'[n];let end;
+    if(o.arrow){
+      const from=o.arrow.from==='ball'?ballXY(st.ball,st.pos):st.pos.me,to=o.arrow.to;
+      a.appendChild(svgEl('line',{x1:from[0],y1:from[1],x2:to[0],y2:to[1],stroke:'#ffd23f','stroke-width':.7*k,'stroke-dasharray':`${1.6*k} ${1.2*k}`,'marker-end':'url(#ah)'}));
+      end=to;
+    }else end=[st.pos.me[0]-5.5*k,st.pos.me[1]-2.5*k];
+    const b=svgEl('g',{transform:`translate(${end[0]} ${end[1]-3.2*k}) scale(${k})`});
+    b.appendChild(svgEl('circle',{r:2.4,fill:'#ffd23f',stroke:'#10241a','stroke-width':.3}));
+    const t=svgEl('text',{y:1.1,'text-anchor':'middle','font-size':3.2,'font-weight':700,fill:'#3b2a00','font-family':'Fredoka,sans-serif'});t.textContent=L;b.appendChild(t);a.appendChild(b);
+  });
+}
+/* flip a scenario top-to-bottom so the same idea comes up on the other wing */
+const flipP=p=>Array.isArray(p)?[p[0],64-p[1]]:p;
+const flipPos=o=>o&&Object.fromEntries(Object.entries(o).map(([k,v])=>[k,flipP(v)]));
+const flipV=v=>v&&[v[0],64-v[1],v[2]];
+const flipF=f=>({...f,pos:flipPos(f.pos),ball:flipP(f.ball),view:flipV(f.view)});
+function flip(s){return{...s,players:flipPos(s.players),ball:flipP(s.ball),view:flipV(s.view),intro:s.intro.map(flipF),
+  options:s.options.map(o=>({...o,arrow:o.arrow&&{...o.arrow,to:flipP(o.arrow.to)},outcome:o.outcome.map(flipF)}))}}
+function newRound(){
+  const pool=SCENARIOS.map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,ROUND_SIZE);
+  round=pool.map(i=>Math.random()<.5?flip(SCENARIOS[i]):SCENARIOS[i]);stars=[];load(0);
+}
+function dots(){$('dots').innerHTML=round.map((_,i)=>`<b class="${stars[i]===true?'star':stars[i]===false?'tried':''}${i===idx?' now':''}" title="Question ${i+1}"></b>`).join('')}
+function header(){
+  $('tag').textContent=S.kind;$('tag').className='tag '+({Defending:'def',Attacking:'',Positioning:'pos'}[S.kind]??'set');
+  $('count').textContent=`Question ${idx+1} of ${round.length} · ${S.title}`;dots();
+}
+function load(i){
+  idx=i;S=round[i];tries=0;
+  order=S.options.map((_,n)=>n).sort(()=>Math.random()-.5);
+  build();header();watch();
+}
+function watch(){
+  token++;$('banner').className='banner';
+  st={pos:Object.fromEntries(Object.entries(S.players).map(([k,v])=>[k,[...v]])),ball:S.ball};
+  cam=[...FULL];render(st.pos,ballXY(st.ball,st.pos));
+  $('arrows').innerHTML='';$('fb').hidden=true;
+  $('q').textContent=S.setup;$('opts').innerHTML='<p class="watch">Watch the pitch…</p>';say(S.setup);
+  const my=token;setTimeout(()=>{if(my===token)play([{d:1100,view:S.view||FULL},...S.intro],ask)},700);
+}
+function ask(){
+  frozen=clone(st);$('q').textContent=S.q;say(S.q);drawArrows();
+  $('opts').innerHTML=order.map((oi,n)=>{const o=S.options[oi];return`<button class="opt" data-o="${oi}"><span class="letter">${'ABC'[n]}</span><span class="verb v-${o.verb.toLowerCase()}">${o.verb}</span><span>${o.text}</span></button>`}).join('');
+  $('fb').hidden=true;
+}
+function choose(oi){
+  const o=S.options[oi];tries++;
+  if(stars[idx]===undefined)stars[idx]=!!o.correct;
+  document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(+b.dataset.o===oi)b.classList.add('picked')});
+  $('arrows').innerHTML='';tone=o.correct?'good':'bad';
+  play(o.outcome,()=>feedback(o));
+}
+function feedback(o){
+  const fb=$('fb'),last=idx===round.length-1;
+  fb.className='fb '+(o.correct?'good':'bad');fb.hidden=false;
+  fb.innerHTML=o.correct
+    ?`<h3>${tries===1?'Great choice!':'You got it!'}</h3><p>${o.why}</p><div class="row"><button class="btn" data-act="next">${last?'See my stars':'Next question'}</button></div>`
+    :`<h3>Not this time</h3><p>${o.why}</p><div class="row"><button class="btn" data-act="retry">Try again</button></div>`;
+  say((o.correct?'Great choice! ':'Not this time. ')+o.why);dots();
+  fb.querySelector('.btn').focus({preventScroll:true});
+}
+function retry(){$('banner').className='banner';st=clone(frozen);cam=st.cam;render(st.pos,ballXY(st.ball,st.pos));ask()}
+function finish(){
+  const n=stars.filter(x=>x===true).length;token++;$('arrows').innerHTML='';dots();
+  st={pos:st.pos,ball:st.ball};play([{d:1000,view:FULL}]);
+  $('tag').textContent='Full time';$('tag').className='tag def';$('count').textContent='';
+  $('q').textContent=`You got ${n} out of ${round.length} right first time!`;
+  $('opts').innerHTML='';const fb=$('fb');fb.hidden=false;fb.className='fb good';
+  fb.innerHTML=`<h3>${n===round.length?'Perfect match!':n>=round.length/2?'Brilliant thinking!':'Good practice!'}</h3><p>Every time you play, these decisions get quicker — just like in a real match.</p><div class="row"><button class="btn" data-act="again">Play again</button></div>`;
+  say($('q').textContent);
+}
+
+$('opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(b&&!b.disabled)choose(+b.dataset.o)});
+$('fb').addEventListener('click',e=>{const a=e.target.closest('[data-act]')?.dataset.act;
+  if(a==='next')idx===round.length-1?finish():load(idx+1);
+  if(a==='retry')retry();if(a==='again')newRound()});
+$('replay').addEventListener('click',()=>{token++;if(S)watch()});
+$('speak').addEventListener('click',e=>{speakOn=!speakOn;e.currentTarget.textContent='Read aloud: '+(speakOn?'on':'off');e.currentTarget.setAttribute('aria-pressed',speakOn);if(speakOn)say($('q').textContent);else try{speechSynthesis.cancel()}catch(x){}});
+document.addEventListener('keydown',e=>{if(e.target.closest('input'))return;const n='abc'.indexOf(e.key.toLowerCase());const b=document.querySelectorAll('.opt')[n];if(n>=0&&b&&!b.disabled)choose(+b.dataset.o)});
+$('nameIn').value=myName;
+$('nameIn').addEventListener('input',e=>{myName=e.target.value;try{localStorage.setItem('wsib-name',myName)}catch(x){}setTag()});
+document.fonts?.ready.then(setTag);
+newRound();
+}
+</script>
+</body>
+</html>
