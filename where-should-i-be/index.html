@@ -14,62 +14,67 @@
    LAYOUT: modest title strip, pitch, then one calm column of big answer buttons and feedback. */
 :root{color-scheme:light dark;--bg:light-dark(#eef5ec,#0c1610);--ink:light-dark(#10241a,#e7f2e9);--soft:light-dark(#4c6655,#a5bdab);--card:light-dark(#ffffff,#15241b);--line:light-dark(#d3e3d5,#2a3e31);--us:#2563eb;--them:#e03c3c;--me:#ffd23f;--good:light-dark(#e3f6e6,#163a22);--goodInk:light-dark(#17632c,#8fe0a3);--warn:light-dark(#fff4d6,#3a2f12);--warnInk:light-dark(#8a5a00,#ffd27a)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
-*{box-sizing:border-box;min-width:0}
+*{box-sizing:border-box;min-width:0}[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip}
 h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;line-height:1.1;margin:0;text-wrap:balance}
-header{background:#0f3d24;color:#fff;padding:14px max(5vw,16px)}
-header .in{max-width:1000px;margin:auto;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-header h1{font-size:clamp(26px,5vw,34px)}header p{margin:0;color:#bfe3c9;font-size:15px}
-main{max-width:1000px;margin:auto;padding:16px max(4vw,12px) 40px}
-.fig{position:relative;aspect-ratio:108/72;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px -12px #0006;background:#2a8240}
+.page{min-height:100dvh;display:grid;grid-template-rows:auto minmax(190px,1fr) auto;grid-template-areas:"top" "pitch" "panel";max-width:1100px;margin:auto}
+header{grid-area:top;background:#0f3d24;color:#fff;padding:8px max(3vw,12px);display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap}
+header{flex-wrap:nowrap}header h1{font-size:clamp(18px,4.6vw,26px);margin-right:auto;white-space:nowrap}
+.hb{flex:none;min-height:40px;padding:6px 12px;border-radius:10px;border:2px solid #2f6b47;background:#0b2e1b;color:#fff;font:700 14px Nunito,sans-serif;cursor:pointer}
+.hb:focus-visible{outline:3px solid var(--me);outline-offset:2px}.hb[aria-pressed=true]{background:#ffd23f;color:#3b2a00;border-color:#ffd23f}
+.foot{max-width:1100px;margin:0 auto;padding:6px max(2vw,8px) 24px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:14px;color:var(--soft)}
+.name{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink)}
+.name input{width:9em;min-height:44px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 16px Nunito,sans-serif}
+.name input:focus-visible{outline:3px solid var(--me);outline-offset:2px}
+.fig{grid-area:pitch;position:relative;margin:10px max(2vw,8px) 0;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px -12px #0006;background:#267a3b}
 .fig>svg{position:absolute;inset:0;width:100%;height:100%}
-.banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);opacity:0;padding:10px 22px;border-radius:16px;font:700 clamp(24px,6vw,44px)/1 Fredoka,sans-serif;color:#fff;background:#10241acc;transition:.25s;pointer-events:none;white-space:nowrap}
+.banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);opacity:0;padding:8px 20px;border-radius:16px;font:700 clamp(24px,5vw,40px)/1 Fredoka,sans-serif;color:#fff;background:#10241acc;transition:.25s;pointer-events:none;white-space:nowrap}
 .banner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}.banner.good{background:#178a3acc}.banner.bad{background:#c0392bcc}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--soft);margin:10px 4px 0}
-.legend i{display:inline-block;width:13px;height:13px;border-radius:50%;vertical-align:-1px;margin-right:6px;border:2px solid #fff}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:14px}
-.meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:14px;color:var(--soft);margin-bottom:10px}
-.tag{font-weight:800;padding:3px 10px;border-radius:99px;color:#fff;background:var(--us)}.tag.def{background:#0f3d24}.tag.set{background:#ffd23f;color:#3b2a00}.tag.pos{background:#7c3aed}
-.dots{display:flex;gap:5px;margin-left:auto}.dots b{width:14px;height:14px;border-radius:50%;border:2px solid var(--line)}
+.panel{grid-area:panel;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:10px max(2vw,8px)}
+.meta{display:flex;flex-wrap:nowrap;align-items:center;gap:6px 10px;font-size:13px;color:var(--soft);margin-bottom:6px}
+.tag{font-weight:800;padding:2px 10px;border-radius:99px;color:#fff;background:var(--us)}.tag.def{background:#0f3d24}.tag.set{background:#ffd23f;color:#3b2a00}.tag.pos{background:#7c3aed}
+#count{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tag{flex:none}.dots{display:flex;flex:none;gap:5px;margin-left:auto}.dots b{width:13px;height:13px;border-radius:50%;border:2px solid var(--line)}
 .dots b.star{background:var(--me);border-color:#d9a800}.dots b.tried{background:var(--line)}.dots b.now{border-color:var(--ink)}
-#q{font-size:clamp(22px,4vw,28px);margin-bottom:14px}
-.opts{display:grid;gap:10px}
-.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 17px/1.25 Nunito,sans-serif;text-align:left;cursor:pointer}
+#q{font-size:clamp(19px,3.2vw,24px);margin-bottom:10px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:10px;width:100%;min-height:50px;padding:7px 12px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 16px/1.25 Nunito,sans-serif;text-align:left;cursor:pointer}
 .opt:hover:not(:disabled){border-color:var(--us)}.opt:disabled{cursor:default;opacity:.55}.opt.picked{opacity:1;border-color:var(--ink)}
 .opt:focus-visible,.btn:focus-visible{outline:3px solid var(--me);outline-offset:2px}
-.letter{flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--me);color:#3b2a00;font:700 17px Fredoka,sans-serif}
-.verb{flex:none;font-size:13px;font-weight:800;padding:3px 9px;border-radius:8px;color:#10241a}
-.v-run{background:#bcd4ff}.v-pass{background:#b7f0dc}.v-shoot{background:#ffc7b8}.v-stay{background:#dde3de}.v-tackle{background:#ffe08a}.v-stand{background:#f3d1ff}.v-clear{background:#ffd9a8}
-.fb{border-radius:14px;padding:14px 16px;margin-top:14px}.fb.good{background:var(--good);color:var(--goodInk)}.fb.bad{background:var(--warn);color:var(--warnInk)}
-.fb h3{font-size:24px;margin-bottom:4px}.fb p{margin:0 0 12px;color:var(--ink)}
+.letter{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--me);color:#3b2a00;font:700 16px Fredoka,sans-serif}
+.verb{flex:none;font-size:13px;font-weight:800;padding:2px 8px;border-radius:8px;color:#10241a}
+.v-run{background:#bcd4ff}.v-pass{background:#b7f0dc}.v-shoot{background:#ffc7b8}.v-stay{background:#dde3de}.v-tackle{background:#ffe08a}.v-stand{background:#f3d1ff}.v-clear{background:#ffd9a8}.v-dribble{background:#c9f2a6}
+.fb{border-radius:14px;padding:12px 14px}.fb.good{background:var(--good);color:var(--goodInk)}.fb.bad{background:var(--warn);color:var(--warnInk)}
+.fb h3{font-size:22px;margin-bottom:4px}.fb p{margin:0 0 10px;color:var(--ink);font-size:16px}.fb .picked{font-size:14px;font-weight:700;margin-bottom:4px}
 .row{display:flex;flex-wrap:wrap;gap:10px}
-.btn{min-height:48px;padding:10px 20px;border-radius:12px;border:0;font:700 17px Nunito,sans-serif;cursor:pointer;background:#0f3d24;color:#fff}
+.btn{min-height:46px;padding:8px 20px;border-radius:12px;border:0;font:700 17px Nunito,sans-serif;cursor:pointer;background:#0f3d24;color:#fff}
 .btn.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
-.tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
-.tools .btn{min-height:44px;font-size:15px;padding:8px 14px}
-.watch{color:var(--soft);font-weight:700;margin:0}
-.name{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--soft);margin-left:auto}
-.name input{width:9.5em;min-height:44px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 16px Nunito,sans-serif}
-.name input:focus-visible{outline:3px solid var(--me);outline-offset:2px}
-@media(max-width:600px){.name{margin-left:0;width:100%}.name input{flex:1}}
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.tools .btn{min-height:40px;font-size:14px;padding:6px 12px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--soft);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:5px;border:2px solid #fff}
+.watch{color:var(--soft);font-weight:700;margin:0;min-height:50px}
+@media(max-height:640px){#q{font-size:18px;margin-bottom:8px}.opt{min-height:46px;font-size:15px}.legend{display:none}}
+@media(orientation:landscape) and (min-width:640px){
+  .page{height:100dvh;min-height:0;grid-template-columns:minmax(0,1fr) clamp(300px,34vw,390px);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"top top" "pitch panel"}
+  .fig{margin:10px 0 10px max(2vw,8px)}.panel{overflow-y:auto}
+}
 .halo{transform-box:fill-box;transform-origin:center;animation:pulse 1.4s ease-in-out infinite}
 @keyframes pulse{50%{transform:scale(1.35);opacity:.35}}
 @media(prefers-reduced-motion:reduce){.halo{animation:none}.banner{transition:none}}
-@media(max-width:600px){.panel{padding:14px}.legend{font-size:13px}}
 </style>
 </head>
 <body>
-<header><div class="in"><h1>Where should I be?</h1><p>Football thinking for 7-a-side</p></div></header>
-<main>
+<div class="page">
+<header><h1>Where should I be?</h1><button class="hb" id="replay">Replay</button><button class="hb" id="speak" aria-pressed="false">Voice: off</button></header>
   <div class="fig" id="fig">
     <svg id="pitch" viewBox="-4 -4 108 72" aria-label="Football pitch">
       <defs>
         <marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffd23f"/></marker>
         <radialGradient id="light" cx=".5" cy=".35" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></radialGradient>
       </defs>
-      <rect x="-4" y="-4" width="108" height="72" fill="#267a3b"/>
+      <rect x="-80" y="-80" width="260" height="230" fill="#267a3b"/>
       <g id="stripes"></g>
-      <rect x="-4" y="-4" width="108" height="72" fill="url(#light)"/>
+      <rect x="-80" y="-80" width="260" height="230" fill="url(#light)" opacity=".6"/>
       <g fill="none" stroke="#fff" stroke-opacity=".85" stroke-width=".45">
         <rect x="0" y="0" width="100" height="64"/>
         <line x1="50" y1="0" x2="50" y2="64"/><circle cx="50" cy="32" r="8"/>
@@ -82,16 +87,15 @@ main{max-width:1000px;margin:auto;padding:16px max(4vw,12px) 40px}
     </svg>
     <div class="banner" id="banner"></div>
   </div>
-  <div class="legend"><span><i style="background:var(--us)"></i>Your team (attacking this way →)</span><span><i style="background:var(--them)"></i>Other team</span><span><i style="background:var(--us);border-color:var(--me)"></i><b id="legName">You</b> (yellow ring)</span></div>
-
   <section class="panel" id="panel">
     <div class="meta"><span class="tag" id="tag"></span><span id="count"></span><span class="dots" id="dots"></span></div>
     <h2 id="q"></h2>
     <div class="opts" id="opts"></div>
     <div id="fb" hidden></div>
-    <div class="tools"><button class="btn alt" id="replay">Watch again</button><button class="btn alt" id="speak" aria-pressed="false">Read aloud: off</button><label class="name">Name on pitch <input id="nameIn" maxlength="12" placeholder="You" autocomplete="off"></label></div>
+    <div class="legend"><span><i style="background:var(--us)"></i>Us (attacking →)</span><span><i style="background:var(--them)"></i>Them</span><span><i style="background:var(--us);border-color:var(--me)"></i><b id="legName">You</b></span></div>
   </section>
-</main>
+</div>
+<footer class="foot"><label class="name">Name on the pitch <input id="nameIn" maxlength="12" placeholder="You" autocomplete="off"></label><span>Tip: type a name and it shows under her player.</span></footer>
 <script>
 {
 /* ============================================================
@@ -309,41 +313,59 @@ const SCENARIOS = [
      outcome:[{d:600,ball:'me',pos:{o4:[22,30]}},{d:500,pos:{o4:[16.5,29.5]},ball:'o4'},{d:500,ball:[-1,33],banner:'Goal for them'}],
      why:"Losing the ball right in front of our own goal is dangerous. Get wide, where it's safe."}
   ]},
-{ kind:'Throw-in', title:'Our throw: get free',
-  setup:"We have a throw-in. A red player is standing right next to you.",
-  q:"Your teammate wants to throw it to you, but you're being marked. What should you do?",
-  players:{g:[5,32],d1:[30,22],d2:[32,44],m1:[70,64.6],m2:[56,40],me:[71,52],f:[84,40],
+{ kind:'Kick-in', title:'Our kick-in: get free',
+  setup:"We have a kick-in. A red player is standing right next to you.",
+  q:"Your teammate wants to pass the kick-in to you, but you're being marked. What should you do?",
+  players:{g:[5,32],d1:[30,22],d2:[32,44],m1:[70,65.6],m2:[56,40],me:[71,52],f:[84,40],
            ok:[95,32],od1:[86,30],od2:[86,48],o1:[60,52],o2:[72.5,50],o3:[64,36],o4:[54,28]},
-  ball:'m1', view:[72,52,52],
+  ball:[70,63.6], view:[72,52,52],
   intro:[{d:1200,pos:{o1:[62,54],m2:[58,42]}}],
   options:[
     {verb:'Run',text:'Sprint away from her into space',correct:true,arrow:{from:'me',to:[81,54]},
      outcome:[{d:800,pos:{me:[81,54],o2:[76,52]}},{d:600,ball:'me'},{d:700,pos:{me:[86,52]},banner:'Free!'}],
-     why:"Standing still makes you easy to mark. A quick sprint into space gives the thrower a clear target."},
+     why:"Standing still makes you easy to mark. A quick sprint into space gives the kicker a clear pass."},
     {verb:'Stay',text:'Stay where you are',arrow:null,
      outcome:[{d:700,ball:'o2',banner:'Intercepted!'}],
-     why:"With a red player right next to you, the throw was easy to steal. Move away from your marker!"},
-    {verb:'Run',text:'Stand right next to the thrower',arrow:{from:'me',to:[65,61]},
+     why:"With a red player right next to you, the pass was easy to steal. Move away from your marker!"},
+    {verb:'Run',text:'Stand right next to the kicker',arrow:{from:'me',to:[65,61]},
      outcome:[{d:700,pos:{me:[65,61],o2:[66.5,59]}},{d:500,ball:'me'},{d:500,pos:{o2:[65.5,60.5]},ball:'o2',banner:'Trapped!'}],
      why:"Right by the line you have nowhere to go, and your marker just followed you. Find space away from her."}
   ]},
-{ kind:'Defending', title:'Their throw: mark the free player',
-  setup:"They have a throw-in near our goal. Look at the red players…",
+{ kind:'Kick-in', title:'Dribble it in',
+  setup:"The ball's gone out and it's our kick-in. You're taking it.",
+  q:"You're taking the kick-in and you're allowed to dribble it in. What should you do?",
+  players:{g:[5,32],d1:[26,24],d2:[28,44],m2:[34,46],m3:[44,30],me:[40,65.6],f:[60,42],
+           ok:[95,32],od1:[64,40],od2:[80,26],o1:[54,44],o2:[36,43],o3:[48,22],o4:[58,30]},
+  ball:[40,63.6], view:[48,50,56],
+  intro:[{d:1200,pos:{f:[62,42],od1:[63.5,40.3],m2:[34,48],o2:[35.5,45.6]}}],
+  options:[
+    {verb:'Dribble',text:"Dribble it in — there's lots of space",correct:true,arrow:{from:'me',to:[54,56]},
+     outcome:[{d:1000,pos:{me:[54,56],o1:[55,50]},ball:'me'},{d:700,pos:{me:[63,55]},banner:'Off you go!'}],
+     why:"Both teammates had a red player right next to them, but there was loads of space in front of you. When it's open, dribble it in yourself!"},
+    {verb:'Pass',text:'Kick it to our striker',arrow:{from:'ball',to:[62,42]},
+     outcome:[{d:800,ball:'od1',banner:'Intercepted!'}],
+     why:"Our striker had a red player right next to her, so the pass was easy to cut out. You had space to dribble."},
+    {verb:'Stay',text:'Wait for a teammate to come closer',arrow:null,
+     outcome:[{d:1100,pos:{o1:[44,58],o4:[48,55]},banner:'Too slow'}],
+     why:"Waiting gave the other team time to close you down. If there's space in front of you, go!"}
+  ]},
+{ kind:'Defending', title:'Their kick-in: mark the free player',
+  setup:"They have a kick-in near our goal. Look at the red players…",
   q:"One red player near our goal has nobody marking her. What should you do?",
   players:{g:[3,32],me:[24,22],d2:[15,36],m1:[25,8],m2:[34,30],m3:[30,46],f:[52,32],
-           ok:[95,32],od1:[66,24],od2:[66,42],o1:[20,-0.6],o2:[27,6],o3:[18,37],o4:[12,20]},
-  ball:'o1', view:[26,20,62],
+           ok:[95,32],od1:[66,24],od2:[66,42],o1:[20,-1.6],o2:[27,6],o3:[18,37],o4:[12,20]},
+  ball:[20,0.4], view:[26,18,66],
   intro:[{d:1200,pos:{o4:[11,19],o3:[17,38]}}],
   options:[
     {verb:'Stand',text:'Mark her, on the goal side',correct:true,arrow:{from:'me',to:[8,22]},
      outcome:[{d:900,pos:{me:[8,22]}},{d:700,ball:'me',banner:'Got there first!'}],
      why:"An unmarked player near our goal is the most dangerous one. Get close to her, between her and the goal."},
-    {verb:'Run',text:'Go and block the thrower',arrow:{from:'me',to:[20,4]},
-     outcome:[{d:900,pos:{me:[20,4]}},{d:600,ball:'o4'},{d:500,ball:[-1,30],banner:'Goal for them'}],
-     why:"The thrower can't score from the side line. The free player near goal was the danger."},
+    {verb:'Run',text:'Go and stand in front of the kicker',arrow:{from:'me',to:[20,5]},
+     outcome:[{d:900,pos:{me:[20,5]}},{d:600,ball:'o4'},{d:500,ball:[-1,30],banner:'Goal for them'}],
+     why:"The kicker is far out on the side line. The free player near goal was the real danger."},
     {verb:'Stay',text:'Stay where you are',arrow:null,
      outcome:[{d:600,ball:'o4'},{d:500,ball:[-1,30],banner:'Goal for them'}],
-     why:"Nobody was marking the red player near our goal, so the throw went straight to her."}
+     why:"Nobody was marking the red player near our goal, so the kick-in went straight to her."}
   ]},
 { kind:'Positioning', title:'Stay wide',
   setup:"Your team has the ball on the far side of the pitch.",
@@ -492,7 +514,7 @@ function fit(v){const w=Math.min(108,v[2]),h=w/1.5;return[Math.min(Math.max(v[0]
 /* sprites shrink a little as we zoom in so they stay a comfortable size */
 const kOf=v=>Math.max(.62,Math.sqrt(v[2]/108));
 
-for(let i=0;i<10;i++)$('stripes').appendChild(svgEl('rect',{x:i*10,y:-4,width:10,height:72,fill:i%2?'#2c8a44':'#29813f'}));
+for(let i=-8;i<18;i++)$('stripes').appendChild(svgEl('rect',{x:i*10,y:-80,width:10,height:230,fill:i%2?'#2c8a44':'#29813f'}));
 
 function ballXY(b,pos){if(typeof b!=='string')return b;const k=kOf(cam);return[pos[b][0]+1.7*k,pos[b][1]+1.5*k]}
 function render(pos,b,v=cam){
@@ -500,6 +522,8 @@ function render(pos,b,v=cam){
   $('pitch').setAttribute('viewBox',`${v[0]-w/2} ${v[1]-h/2} ${w} ${h}`);
   for(const id in els)els[id].setAttribute('transform',`translate(${pos[id][0]} ${pos[id][1]}) scale(${k})`);
   $('ballG').setAttribute('transform',`translate(${b[0]} ${b[1]}) scale(${k})`);
+  const tg=els.me&&els.me.querySelector('.tag');
+  if(tg)tg.setAttribute('transform',pos.me[1]+8.5*k>v[1]+h/2?'translate(0 -11.8)':'');
 }
 function setTag(){
   const p=els.me;if(!p)return;p.querySelector('.tag')?.remove();
@@ -558,7 +582,7 @@ function drawArrows(){
       const from=o.arrow.from==='ball'?ballXY(st.ball,st.pos):st.pos.me,to=o.arrow.to;
       a.appendChild(svgEl('line',{x1:from[0],y1:from[1],x2:to[0],y2:to[1],stroke:'#ffd23f','stroke-width':.7*k,'stroke-dasharray':`${1.6*k} ${1.2*k}`,'marker-end':'url(#ah)'}));
       end=to;
-    }else end=[st.pos.me[0]-5.5*k,st.pos.me[1]-2.5*k];
+    }else end=[st.pos.me[0]-7.5*k,st.pos.me[1]+3.2*k];
     const b=svgEl('g',{transform:`translate(${end[0]} ${end[1]-3.2*k}) scale(${k})`});
     b.appendChild(svgEl('circle',{r:2.4,fill:'#ffd23f',stroke:'#10241a','stroke-width':.3}));
     const t=svgEl('text',{y:1.1,'text-anchor':'middle','font-size':3.2,'font-weight':700,fill:'#3b2a00','font-family':'Fredoka,sans-serif'});t.textContent=L;b.appendChild(t);a.appendChild(b);
@@ -590,12 +614,12 @@ function watch(){
   st={pos:Object.fromEntries(Object.entries(S.players).map(([k,v])=>[k,[...v]])),ball:S.ball};
   cam=[...FULL];render(st.pos,ballXY(st.ball,st.pos));
   $('arrows').innerHTML='';$('fb').hidden=true;
-  $('q').textContent=S.setup;$('opts').innerHTML='<p class="watch">Watch the pitch…</p>';say(S.setup);
+  $('q').textContent=S.setup;$('opts').hidden=false;$('opts').innerHTML='<p class="watch">Watch the pitch…</p>';say(S.setup);
   const my=token;setTimeout(()=>{if(my===token)play([{d:1100,view:S.view||FULL},...S.intro],ask)},700);
 }
 function ask(){
   frozen=clone(st);$('q').textContent=S.q;say(S.q);drawArrows();
-  $('opts').innerHTML=order.map((oi,n)=>{const o=S.options[oi];return`<button class="opt" data-o="${oi}"><span class="letter">${'ABC'[n]}</span><span class="verb v-${o.verb.toLowerCase()}">${o.verb}</span><span>${o.text}</span></button>`}).join('');
+  $('opts').hidden=false;$('opts').innerHTML=order.map((oi,n)=>{const o=S.options[oi];return`<button class="opt" data-o="${oi}"><span class="letter">${'ABC'[n]}</span><span class="verb v-${o.verb.toLowerCase()}">${o.verb}</span><span>${o.text}</span></button>`}).join('');
   $('fb').hidden=true;
 }
 function choose(oi){
@@ -607,10 +631,11 @@ function choose(oi){
 }
 function feedback(o){
   const fb=$('fb'),last=idx===round.length-1;
-  fb.className='fb '+(o.correct?'good':'bad');fb.hidden=false;
+  fb.className='fb '+(o.correct?'good':'bad');fb.hidden=false;$('opts').hidden=true;
+  const pick=`<div class="picked">You chose: ${o.text}</div>`;
   fb.innerHTML=o.correct
-    ?`<h3>${tries===1?'Great choice!':'You got it!'}</h3><p>${o.why}</p><div class="row"><button class="btn" data-act="next">${last?'See my stars':'Next question'}</button></div>`
-    :`<h3>Not this time</h3><p>${o.why}</p><div class="row"><button class="btn" data-act="retry">Try again</button></div>`;
+    ?`${pick}<h3>${tries===1?'Great choice!':'You got it!'}</h3><p>${o.why}</p><div class="row"><button class="btn" data-act="next">${last?'See my stars':'Next question'}</button></div>`
+    :`${pick}<h3>Not this time</h3><p>${o.why}</p><div class="row"><button class="btn" data-act="retry">Try again</button></div>`;
   say((o.correct?'Great choice! ':'Not this time. ')+o.why);dots();
   fb.querySelector('.btn').focus({preventScroll:true});
 }
@@ -630,7 +655,7 @@ $('fb').addEventListener('click',e=>{const a=e.target.closest('[data-act]')?.dat
   if(a==='next')idx===round.length-1?finish():load(idx+1);
   if(a==='retry')retry();if(a==='again')newRound()});
 $('replay').addEventListener('click',()=>{token++;if(S)watch()});
-$('speak').addEventListener('click',e=>{speakOn=!speakOn;e.currentTarget.textContent='Read aloud: '+(speakOn?'on':'off');e.currentTarget.setAttribute('aria-pressed',speakOn);if(speakOn)say($('q').textContent);else try{speechSynthesis.cancel()}catch(x){}});
+$('speak').addEventListener('click',e=>{speakOn=!speakOn;e.currentTarget.textContent='Voice: '+(speakOn?'on':'off');e.currentTarget.setAttribute('aria-pressed',speakOn);if(speakOn)say($('q').textContent);else try{speechSynthesis.cancel()}catch(x){}});
 document.addEventListener('keydown',e=>{if(e.target.closest('input'))return;const n='abc'.indexOf(e.key.toLowerCase());const b=document.querySelectorAll('.opt')[n];if(n>=0&&b&&!b.disabled)choose(+b.dataset.o)});
 $('nameIn').value=myName;
 $('nameIn').addEventListener('input',e=>{myName=e.target.value;try{localStorage.setItem('wsib-name',myName)}catch(x){}setTag()});
