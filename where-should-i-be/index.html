@@ -115,6 +115,7 @@ header{flex-wrap:nowrap}header h1{font-size:clamp(18px,4.6vw,26px);margin-right:
          Any frame can also have a view to pan the camera mid-scenario.
    intro: frames played before the question. Each frame: { d: ms, pos: {id:[x,y]}, ball, banner, view }
           Only list the players that move. Frames run one after another.
+   Text: write {side} and it becomes "left" or "right" depending on which wing she's on.
    options: { verb: Run|Pass|Shoot|Stay|Tackle, text, correct, arrow:{from:'me'|'ball', to:[x,y]} or null,
               outcome: [frames played after she chooses], why: the coaching point }
    ============================================================ */
@@ -372,20 +373,20 @@ const SCENARIOS = [
      outcome:[{d:600,ball:'o4'},{d:500,ball:[-1,30],banner:'Goal for them'}],
      why:"Nobody was marking the red player near our goal, so the kick-in went straight to her."}
   ]},
-{ kind:'Positioning', title:'Stay wide',
-  setup:"Your team has the ball on the far side of the pitch.",
-  q:"Your teammate has the ball over on the other side. Where should you be?",
+{ kind:'Positioning', title:'Stay wide: {side} midfield',
+  setup:"You're playing {side} midfield. Your team has the ball over on the other wing.",
+  q:"You're our {side} midfielder and the ball is on the other wing. Where should you be?",
   players:{g:[5,32],d1:[34,22],d2:[36,42],m1:[58,10],m2:[48,30],me:[60,46],f:[74,30],
            ok:[95,32],od1:[82,24],od2:[82,40],o1:[66,12],o2:[52,18],o3:[56,32],o4:[44,36]},
-  ball:'m1', view:[66,32,72], lane:null,
-  intro:[{d:1300,pos:{m1:[60,10],o1:[64,11],o2:[54,15]}}],
+  ball:'m1', view:[64,32,88], lane:null,
+  intro:[{d:1300,pos:{m1:[60,10],o1:[69,14],o2:[52,16]}}],
   options:[
-    {verb:'Stand',text:'Stay wide on your side',correct:true,arrow:{from:'me',to:[64,57]},
+    {verb:'Stand',text:'Stay wide on the {side} wing',correct:true,arrow:{from:'me',to:[64,57]},
      outcome:[{d:800,pos:{me:[64,57]}},{d:800,ball:'me'},{d:800,pos:{me:[78,56]},banner:'Loads of space!'}],
-     why:"Staying wide makes the pitch big. Your teammate can switch the ball to you, far away from the crowd of red players."},
+     why:"As the {side} midfielder, your job is to stay wide on the {side} even when the ball is on the other side. It makes the pitch big, and your teammate can switch the ball to you, away from the crowd of red players."},
     {verb:'Run',text:'Go over to the ball',arrow:{from:'me',to:[58,18]},
      outcome:[{d:900,pos:{me:[58,18],o3:[58,22]}},{d:500,pos:{o1:[61,10.5]},ball:'o1',banner:'Too crowded!'}],
-     why:"Going to the ball brings more red players with you. Stay wide and give your teammate an easy pass."},
+     why:"Going to the ball brings more red players with you. A {side} midfielder stays wide on the {side} and gives her teammate an easy pass."},
     {verb:'Run',text:'Run into the middle next to our striker',arrow:{from:'me',to:[71,34]},
      outcome:[{d:900,pos:{me:[71,34]}},{d:500,pos:{o1:[61,10.5]},ball:'o1',banner:'No space'}],
      why:"Two of you in the same spot means one red player can mark you both. Spread out!"}
@@ -397,7 +398,7 @@ const SCENARIOS = [
   players:{g:[3,33],me:[11,24],d2:[12,42],m1:[38,6],m2:[30,30],m3:[30,48],f:[52,30],
            ok:[95,32],od1:[66,24],od2:[66,42],o1:[34,14],o2:[17,37],o3:[36,44],o4:[22,22]},
   ball:'me', view:[24,24,66],
-  intro:[{d:1200,pos:{o4:[14.5,23],o2:[15,36]}}],
+  intro:[{d:1200,pos:{o4:[19,21.5],o2:[15,36]}}],
   options:[
     {verb:'Clear',text:'Kick it hard, out wide and up the pitch',correct:true,arrow:{from:'ball',to:[38,6]},
      outcome:[{d:800,ball:'m1'},{d:700,pos:{m1:[48,6]},banner:'Cleared!'}],
@@ -487,7 +488,7 @@ const SCENARIOS = [
   players:{g:[5,32],d1:[30,22],d2:[30,42],me:[48,14],m2:[44,32],m3:[58,50],f:[70,32],
            ok:[95,32],od1:[78,26],od2:[80,40],o1:[60,12],o2:[46,22],o3:[62,20],o4:[38,34]},
   ball:'me', view:[58,32,70], lane:['ball','m3'],
-  intro:[{d:1400,pos:{me:[52,14],o1:[57,12],o2:[48,20],o3:[60,19],m3:[62,50]}}],
+  intro:[{d:1400,pos:{me:[52,14],o1:[60,11],o2:[48,20],o3:[61,19],m3:[62,50]}}],
   options:[
     {verb:'Pass',text:'Pass across to your free teammate',correct:true,arrow:{from:'ball',to:[62,50]},
      outcome:[{d:900,ball:'m3'},{d:900,pos:{m3:[78,50]},banner:'Loads of space!'}],
@@ -683,6 +684,9 @@ const flipV=v=>v&&[v[0],64-v[1],v[2]];
 const flipF=f=>({...f,pos:flipPos(f.pos),ball:flipP(f.ball),view:flipV(f.view)});
 function flip(s){return{...s,players:flipPos(s.players),ball:flipP(s.ball),view:flipV(s.view),intro:s.intro.map(flipF),
   options:s.options.map(o=>({...o,arrow:o.arrow&&{...o.arrow,to:flipP(o.arrow.to)},outcome:o.outcome.map(flipF)}))}}
+/* "{side}" in any text becomes left or right, from where she stands (we attack left-to-right, so the bottom is the right) */
+function sided(s){const side=s.players.me[1]>32?'right':'left',f=t=>typeof t==='string'?t.replaceAll('{side}',side):t;
+  return{...s,title:f(s.title),setup:f(s.setup),q:f(s.q),options:s.options.map(o=>({...o,text:f(o.text),why:f(o.why)}))}}
 function newRound(){
   const pool=SCENARIOS.map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,ROUND_SIZE);
   round=pool.map(i=>Math.random()<.5?flip(SCENARIOS[i]):SCENARIOS[i]);stars=[];load(0);
@@ -693,7 +697,7 @@ function header(){
   $('count').textContent=`Question ${idx+1} of ${round.length} · ${S.title}`;dots();
 }
 function load(i){
-  idx=i;S=round[i];tries=0;
+  idx=i;S=sided(round[i]);tries=0;
   order=S.options.map((_,n)=>n).sort(()=>Math.random()-.5);
   build();header();watch();
 }
