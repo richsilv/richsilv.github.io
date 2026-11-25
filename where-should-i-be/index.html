@@ -40,8 +40,8 @@ header{flex-wrap:nowrap}header h1{font-size:clamp(18px,4.6vw,26px);margin-right:
 .dir .ln{flex:1;position:relative;height:6px;border-radius:3px;background:#3b82f6;margin-right:14px;display:flex;justify-content:center;align-items:center}
 .dir .ln::after{content:"";position:absolute;right:-14px;top:-7px;border-left:16px solid #3b82f6;border-top:10px solid transparent;border-bottom:10px solid transparent}
 .dir .ln b{background:#2563eb;color:#fff;padding:2px 10px;border-radius:99px;font:700 14px Fredoka,Nunito,sans-serif;border:2px solid #0d2f1c}
-.banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);opacity:0;padding:8px 20px;border-radius:16px;font:700 clamp(24px,5vw,40px)/1 Fredoka,sans-serif;color:#fff;background:#10241acc;transition:.25s;pointer-events:none;white-space:nowrap}
-.banner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}.banner.good{background:#178a3acc}.banner.bad{background:#c0392bcc}
+.banner{position:absolute;left:50%;bottom:12px;transform:translateX(-50%) scale(.6);transform-origin:50% 100%;opacity:0;padding:8px 20px;border-radius:16px;font:700 clamp(24px,5vw,40px)/1 Fredoka,sans-serif;color:#fff;background:#10241acc;transition:.25s;pointer-events:none;white-space:nowrap}
+.banner.on{opacity:1;transform:translateX(-50%) scale(1)}.banner.good{background:#178a3acc}.banner.bad{background:#c0392bcc}
 .panel{grid-area:panel;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:10px max(2vw,8px)}
 .meta{display:flex;flex-wrap:nowrap;align-items:center;gap:6px 10px;font-size:13px;color:var(--soft);margin-bottom:6px}
 .tag{font-weight:800;padding:2px 10px;border-radius:99px;color:#fff;background:var(--us)}.tag.def{background:#0f3d24}.tag.set{background:#ffd23f;color:#3b2a00}.tag.pos{background:#7c3aed}.tag.drill{background:#ea580c}
@@ -169,8 +169,11 @@ const SCENARIOS = [
   intro:[{d:1800,pos:{o1:[40,13],m1:[44,17],o2:[50,30],o4:[32,38],o3:[54,50],m2:[42,32],od1:[70,22],od2:[70,42],f:[60,30]}}],
   options:[
     {verb:'Run',text:'Close her down',correct:true,arrow:{from:'me',to:[35,15]},
-     outcome:[{d:900,pos:{me:[34,15],o1:[37,14]}},{d:700,pos:{me:[35,13],o1:[36,11]},banner:'Slowed her down!'}],
-     why:'You are the nearest defender, so it’s your job to go and get close. Stay on your toes and push her towards the side line, away from the goal.'},
+     outcome:[{d:900,pos:{me:[31,14],o1:[39,13],m1:[45,15],m2:[40,28],d2:[24,40]}},
+              {d:900,pos:{me:[30.5,13],o1:[37.5,12],m1:[42.5,12],m2:[37,23],d2:[22,36],o2:[45,29]},banner:'Slowed her down!'},
+              {d:900,pos:{m1:[41,11],m2:[35,18],d2:[21,33]},banner:'Help is here!'},
+              {d:500,pos:{m1:[38.5,11],o1:[36.5,14]},ball:'m1'},{d:800,pos:{m1:[46,9]},banner:'Ball won!'}],
+     why:'You are the nearest defender, so it’s your job to go and get close. You don’t have to win the ball straight away — slowing her down gives your teammates time to sprint back and help. Then you can win it together!'},
     {verb:'Run',text:'Cover behind the other defender',arrow:{from:'me',to:[16,38]},
      outcome:[{d:900,pos:{me:[16,38],o1:[30,15],o4:[24,36]}},{d:800,pos:{o1:[17,21]}},{d:500,ball:[-1,30],banner:'Goal for them'}],
      why:'Covering is the OTHER defender’s job when the ball is on your side. Nobody stopped the dribbler, so she ran straight at goal.'},
