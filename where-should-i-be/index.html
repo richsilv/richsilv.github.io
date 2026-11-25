@@ -22,7 +22,15 @@ header{grid-area:top;background:#0f3d24;color:#fff;padding:8px max(3vw,12px);dis
 header{flex-wrap:nowrap}header h1{font-size:clamp(18px,4.6vw,26px);margin-right:auto;white-space:nowrap}
 .hb{flex:none;min-height:40px;padding:6px 12px;border-radius:10px;border:2px solid #2f6b47;background:#0b2e1b;color:#fff;font:700 14px Nunito,sans-serif;cursor:pointer}
 .hb:focus-visible{outline:3px solid var(--me);outline-offset:2px}.hb[aria-pressed=true]{background:#ffd23f;color:#3b2a00;border-color:#ffd23f}
-.foot{max-width:1100px;margin:0 auto;padding:6px max(2vw,8px) 24px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:14px;color:var(--soft)}
+.foot{max-width:1100px;margin:0 auto;padding:6px max(2vw,8px) 32px}
+.team{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.team h2{font-size:22px;margin-bottom:4px}.team p{margin:0 0 12px;color:var(--soft);font-size:15px}
+.mates{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:12px 0}
+.mates input,.share input{width:100%;min-height:44px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 16px Nunito,sans-serif}
+.mates input:focus-visible,.share input:focus-visible{outline:3px solid var(--me);outline-offset:2px}
+.share{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.share input{flex:1 1 220px;font-weight:500;font-size:14px}
+#linkMsg{font-weight:700;color:var(--goodInk)}
+.lk{border:0;background:none;padding:0;font:700 13px Nunito,sans-serif;color:var(--us);text-decoration:underline;cursor:pointer;min-height:24px}
 .name{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink)}
 .name input{width:9em;min-height:44px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 16px Nunito,sans-serif}
 .name input:focus-visible{outline:3px solid var(--me);outline-offset:2px}
@@ -97,10 +105,16 @@ header{flex-wrap:nowrap}header h1{font-size:clamp(18px,4.6vw,26px);margin-right:
     <h2 id="q"></h2>
     <div class="opts" id="opts"></div>
     <div id="fb" hidden></div>
-    <div class="legend"><span><i style="background:var(--us)"></i>Us (attacking →)</span><span><i style="background:var(--them)"></i>Them</span><span><i style="background:var(--us);border-color:var(--me)"></i><b id="legName">You</b></span></div>
+    <div class="legend"><span><i style="background:var(--us)"></i>Us (attacking →)</span><span><i style="background:var(--them)"></i>Them</span><span><i style="background:var(--us);border-color:var(--me)"></i><b id="legName">You</b></span><button class="lk" id="toTeam">Team names</button></div>
   </section>
 </div>
-<footer class="foot"><label class="name">Name on the pitch <input id="nameIn" maxlength="12" placeholder="You" autocomplete="off"></label><span>Tip: type a name and it shows under her player.</span></footer>
+<footer class="foot"><section class="team" id="team">
+  <h2>Team names</h2>
+  <p>Her name shows in yellow under her player. Add up to 12 teammates and they're given out at random to the blue players in each question.</p>
+  <label class="name">Her name <input id="nameIn" maxlength="12" placeholder="You" autocomplete="off"></label>
+  <div class="mates" id="mates"></div>
+  <div class="share"><button class="btn" id="copyLink">Copy share link</button><input id="linkOut" readonly aria-label="Share link"><span id="linkMsg" role="status"></span></div>
+</section></footer>
 <script>
 {
 /* ============================================================
@@ -583,8 +597,36 @@ const FILL={me:'#2563eb',us:'#2563eb',them:'#e03c3c',gk:'#f59f00',ogk:'#8b5cf6'}
 let stars=[];const ROUND_SIZE=5;let round=[];
 let idx=0,S,st,els={},token=0,order=[],tries=0,frozen,speakOn=false,tone='';
 const FULL=[50,32,108];let cam=[...FULL];
-let myName='';try{myName=localStorage.getItem('wsib-name')||''}catch(e){}
-const label=()=>myName.trim()||'You';
+/* names: her name plus up to 12 teammates. Read from the address (?me=…&t=…&t=…) first, so a
+   reloaded or shared link shows the same team; otherwise from this browser's memory. */
+const MAX_MATES=12,clean=t=>String(t||'').replace(/\s+/g,' ').trim().slice(0,12);
+let myName='',mates=[],names={};
+try{const q=new URLSearchParams(location.search);
+  if(q.has('me')||q.has('t')){myName=q.get('me')||'';mates=q.getAll('t')}
+  else{myName=localStorage.getItem('wsib-name')||'';mates=JSON.parse(localStorage.getItem('wsib-team')||'[]')}}catch(e){}
+myName=clean(myName);mates=(Array.isArray(mates)?mates:[]).map(clean).filter(Boolean).slice(0,MAX_MATES);
+const label=()=>myName||'You';
+const PUBLIC_URL='https://richsilv.github.io/where-should-i-be/';
+function shareURL(){
+  let inFrame=true;try{inFrame=window.self!==window.top}catch(e){}
+  const base=!inFrame&&/^https?:$/.test(location.protocol)?location.origin+location.pathname:PUBLIC_URL;
+  const q=new URLSearchParams();if(myName)q.set('me',myName);mates.forEach(m=>q.append('t',m));
+  const qs=q.toString();return base+(qs?'?'+qs:'');
+}
+function saveNames(){
+  try{localStorage.setItem('wsib-name',myName);localStorage.setItem('wsib-team',JSON.stringify(mates))}catch(e){}
+  try{const u=new URL(location.href),q=new URLSearchParams();if(myName)q.set('me',myName);mates.forEach(m=>q.append('t',m));
+    u.search=q.toString();if(u.href!==location.href)history.replaceState(null,'',u)}catch(e){}
+  $('linkOut').value=shareURL();
+}
+/* give the teammate names out at random, players nearest the action first */
+function assignNames(){
+  names={};const v=S.view||[50,32,108];
+  const ids=Object.keys(S.players).filter(id=>{const t=team(id);return t==='us'||t==='gk'})
+    .map(id=>[id,Math.hypot(S.players[id][0]-v[0],S.players[id][1]-v[1])+Math.random()*12]).sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
+  const pool=[...mates].sort(()=>Math.random()-.5);
+  ids.forEach((id,i)=>{if(pool[i])names[id]=pool[i]});
+}
 /* keep the camera inside the drawn area, at the pitch's 3:2 shape */
 function fit(v){const w=Math.min(108,v[2]),h=w/1.5;return[Math.min(Math.max(v[0],-4+w/2),104-w/2),Math.min(Math.max(v[1],-4+h/2),68-h/2),w]}
 /* sprites shrink a little as we zoom in so they stay a comfortable size */
@@ -603,15 +645,19 @@ function render(pos,b,v=cam){
   $('pitch').setAttribute('viewBox',`${v[0]-w/2} ${v[1]-h/2} ${w} ${h}`);
   for(const id in els)els[id].setAttribute('transform',`translate(${pos[id][0]} ${pos[id][1]}) scale(${k})`);
   $('ballG').setAttribute('transform',`translate(${b[0]} ${b[1]}) scale(${k})`);
-  const tg=els.me&&els.me.querySelector('.tag');
-  if(tg)tg.setAttribute('transform',pos.me[1]+8.5*k>v[1]+h/2?'translate(0 -11.8)':'');
+  /* a name tag hops above its player when she's at the bottom edge of the view */
+  for(const id in els){const tg=els[id].__tag;if(tg)tg.setAttribute('transform',pos[id][1]+8.5*k>v[1]+h/2?`translate(0 ${id==='me'?-11.8:-10.2})`:'')}
 }
 function setTag(){
-  const p=els.me;if(!p)return;p.querySelector('.tag')?.remove();
-  const t=label(),g=svgEl('g',{class:'tag'}),w=t.length*1.85+3.2;
-  g.appendChild(svgEl('rect',{x:-w/2,y:3.7,width:w,height:4.2,rx:2.1,fill:'#ffd23f',stroke:'#10241a','stroke-width':.35}));
-  const tx=svgEl('text',{y:6.95,'text-anchor':'middle','font-size':3.1,'font-weight':700,fill:'#10241a','font-family':'Fredoka,sans-serif'});
-  tx.textContent=t;g.appendChild(tx);p.appendChild(g);$('legName').textContent=t;
+  for(const id in els){
+    const p=els[id];p.__tag?.remove();p.__tag=null;
+    const mine=id==='me',t=mine?label():names[id];if(!t)continue;
+    const g=svgEl('g',{class:'tag'}),fs=mine?3.1:2.5,w=t.length*fs*.6+(mine?3.2:2.6),y=mine?3.7:3.4,hh=mine?4.2:3.5;
+    g.appendChild(svgEl('rect',{x:-w/2,y,width:w,height:hh,rx:hh/2,fill:mine?'#ffd23f':'#ffffff','fill-opacity':mine?1:.92,stroke:'#10241a','stroke-width':mine?.35:.2}));
+    const tx=svgEl('text',{y:y+hh*.75,'text-anchor':'middle','font-size':fs,'font-weight':700,fill:'#10241a','font-family':'Fredoka,sans-serif'});
+    tx.textContent=t;g.appendChild(tx);p.appendChild(g);p.__tag=g;
+  }
+  $('legName').textContent=label();
 }
 function build(){
   const g=$('players');g.innerHTML='';els={};
@@ -697,7 +743,7 @@ function header(){
   $('count').textContent=`Question ${idx+1} of ${round.length} · ${S.title}`;dots();
 }
 function load(i){
-  idx=i;S=sided(round[i]);tries=0;
+  idx=i;S=sided(round[i]);tries=0;assignNames();
   order=S.options.map((_,n)=>n).sort(()=>Math.random()-.5);
   build();header();watch();
 }
@@ -750,7 +796,17 @@ $('replay').addEventListener('click',()=>{token++;if(S)watch()});
 $('speak').addEventListener('click',e=>{speakOn=!speakOn;e.currentTarget.textContent='Voice: '+(speakOn?'on':'off');e.currentTarget.setAttribute('aria-pressed',speakOn);if(speakOn)say($('q').textContent);else try{speechSynthesis.cancel()}catch(x){}});
 document.addEventListener('keydown',e=>{if(e.target.closest('input'))return;const n='abc'.indexOf(e.key.toLowerCase());const b=document.querySelectorAll('.opt')[n];if(n>=0&&b&&!b.disabled)choose(+b.dataset.o)});
 $('nameIn').value=myName;
-$('nameIn').addEventListener('input',e=>{myName=e.target.value;try{localStorage.setItem('wsib-name',myName)}catch(x){}setTag()});
+$('nameIn').addEventListener('input',e=>{myName=clean(e.target.value);saveNames();setTag()});
+$('mates').innerHTML=Array.from({length:MAX_MATES},(_,i)=>`<input maxlength="12" placeholder="Teammate ${i+1}" autocomplete="off" aria-label="Teammate ${i+1}">`).join('');
+const mateIns=[...$('mates').querySelectorAll('input')];mates.forEach((m,i)=>mateIns[i].value=m);
+const readMates=()=>{mates=mateIns.map(i=>clean(i.value)).filter(Boolean);saveNames()};
+$('mates').addEventListener('input',readMates);
+$('mates').addEventListener('change',()=>{readMates();if(S){assignNames();setTag();render(st.pos,ballXY(st.ball,st.pos))}});
+$('toTeam').addEventListener('click',()=>{$('team').scrollIntoView({behavior:'smooth'});$('nameIn').focus({preventScroll:true})});
+$('copyLink').addEventListener('click',async()=>{const u=shareURL();$('linkOut').value=u;
+  try{await navigator.clipboard.writeText(u);$('linkMsg').textContent='Link copied!'}
+  catch(e){$('linkOut').select();$('linkMsg').textContent='Copy the link from the box'}});
+saveNames();
 document.fonts?.ready.then(setTag);
 newRound();
 }
