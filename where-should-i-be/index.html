@@ -27,12 +27,16 @@ header{flex-wrap:nowrap}header h1{font-size:clamp(18px,4.6vw,26px);margin-right:
 .name input{width:9em;min-height:44px;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--ink);font:700 16px Nunito,sans-serif}
 .name input:focus-visible{outline:3px solid var(--me);outline-offset:2px}
 .fig{grid-area:pitch;position:relative;margin:10px max(2vw,8px) 0;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px -12px #0006;background:#267a3b}
-.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.fig>svg{position:absolute;left:0;right:0;bottom:0;top:36px;width:100%;height:calc(100% - 36px)}
+.dir{position:absolute;top:0;left:0;right:0;height:36px;display:flex;align-items:center;gap:10px;padding:0 12px;background:#0d2f1c;color:#cfe8d6;font:600 13px Fredoka,Nunito,sans-serif;white-space:nowrap;z-index:1}
+.dir .ln{flex:1;position:relative;height:6px;border-radius:3px;background:#3b82f6;margin-right:14px;display:flex;justify-content:center;align-items:center}
+.dir .ln::after{content:"";position:absolute;right:-14px;top:-7px;border-left:16px solid #3b82f6;border-top:10px solid transparent;border-bottom:10px solid transparent}
+.dir .ln b{background:#2563eb;color:#fff;padding:2px 10px;border-radius:99px;font:700 14px Fredoka,Nunito,sans-serif;border:2px solid #0d2f1c}
 .banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);opacity:0;padding:8px 20px;border-radius:16px;font:700 clamp(24px,5vw,40px)/1 Fredoka,sans-serif;color:#fff;background:#10241acc;transition:.25s;pointer-events:none;white-space:nowrap}
 .banner.on{opacity:1;transform:translate(-50%,-50%) scale(1)}.banner.good{background:#178a3acc}.banner.bad{background:#c0392bcc}
 .panel{grid-area:panel;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:10px max(2vw,8px)}
 .meta{display:flex;flex-wrap:nowrap;align-items:center;gap:6px 10px;font-size:13px;color:var(--soft);margin-bottom:6px}
-.tag{font-weight:800;padding:2px 10px;border-radius:99px;color:#fff;background:var(--us)}.tag.def{background:#0f3d24}.tag.set{background:#ffd23f;color:#3b2a00}.tag.pos{background:#7c3aed}
+.tag{font-weight:800;padding:2px 10px;border-radius:99px;color:#fff;background:var(--us)}.tag.def{background:#0f3d24}.tag.set{background:#ffd23f;color:#3b2a00}.tag.pos{background:#7c3aed}.tag.drill{background:#ea580c}
 #count{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tag{flex:none}.dots{display:flex;flex:none;gap:5px;margin-left:auto}.dots b{width:13px;height:13px;border-radius:50%;border:2px solid var(--line)}
 .dots b.star{background:var(--me);border-color:#d9a800}.dots b.tried{background:var(--line)}.dots b.now{border-color:var(--ink)}
 #q{font-size:clamp(19px,3.2vw,24px);margin-bottom:10px}
@@ -67,6 +71,7 @@ header{flex-wrap:nowrap}header h1{font-size:clamp(18px,4.6vw,26px);margin-right:
 <div class="page">
 <header><h1>Where should I be?</h1><button class="hb" id="replay">Replay</button><button class="hb" id="speak" aria-pressed="false">Voice: off</button></header>
   <div class="fig" id="fig">
+    <div class="dir" aria-label="Blue team shoots from left to right"><span>Our goal</span><span class="ln"><b>We shoot this way</b></span><span>Their goal</span></div>
     <svg id="pitch" viewBox="-4 -4 108 72" aria-label="Football pitch">
       <defs>
         <marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffd23f"/></marker>
@@ -82,7 +87,7 @@ header{flex-wrap:nowrap}header h1{font-size:clamp(18px,4.6vw,26px);margin-right:
         <rect x="-2.5" y="27" width="2.5" height="10" fill="#ffffff33"/><rect x="100" y="27" width="2.5" height="10" fill="#ffffff33"/>
       </g>
       <circle cx="50" cy="32" r=".7" fill="#fff"/>
-      <g id="arrows"></g><g id="players"></g>
+      <g id="arrows"></g><g id="players"></g><g id="badges"></g>
       <g id="ballG"><ellipse cx=".3" cy="1" rx="1.2" ry=".5" fill="#0005"/><circle r="1.15" fill="#fff" stroke="#10241a" stroke-width=".35"/><path d="M-.45-.35l.45-.35.45.35-.17.5h-.56z" fill="#10241a"/></g>
     </svg>
     <div class="banner" id="banner"></div>
@@ -494,6 +499,76 @@ const SCENARIOS = [
      outcome:[{d:1100,ball:'ok',banner:'Way too far!'}],
      why:"You were near the halfway line — much too far to score. Look for the free teammate."}
   ]}
+,
+/* ---------- drills: just a few players on the pitch ---------- */
+{ kind:'Drill', title:'2 v 1: make an angle',
+  setup:"Drill: two of you against one defender. Your teammate has the ball.",
+  q:"Your teammate is dribbling at the defender. Where should you run?",
+  players:{m1:[54,32],me:[52,22],od1:[82,32],ok:[97,32]},
+  ball:'m1', view:[74,30,56],
+  intro:[{d:1500,pos:{m1:[68,32],me:[62,23],od1:[78,32]}}],
+  options:[
+    {verb:'Run',text:'Sprint wide and forward, so she can pass to you',correct:true,arrow:{from:'me',to:[78,17]},
+     outcome:[{d:900,pos:{me:[78,17],m1:[71,32],od1:[80,33]}},{d:600,ball:'me',pos:{od1:[80,26]}},{d:800,pos:{me:[89,22],od1:[84,25]}},{d:500,ball:[101.2,31],banner:'Goal!'}],
+     why:"Running hard out to the side makes an angle, so the defender isn't in the way of the pass. Now she can't block you both."},
+    {verb:'Run',text:'Run straight towards the goal',arrow:{from:'me',to:[85,26]},
+     outcome:[{d:900,pos:{me:[85,26],m1:[71,32]}},{d:500,ball:'od1',banner:'Blocked!'}],
+     why:"Running straight at goal put the defender right between you and the ball. Run out wide to make an angle for the pass."},
+    {verb:'Stay',text:'Stay behind her and wait',arrow:null,
+     outcome:[{d:800,pos:{m1:[73,32],od1:[75,32]}},{d:400,ball:'od1',banner:'No help'}],
+     why:"Your teammate had nobody to pass to, so the defender could go straight for the ball. Get up alongside her, out wide."}
+  ]},
+{ kind:'Drill', title:'2 v 1: nobody in front',
+  setup:"Drill: you have the ball. Watch where the defender goes…",
+  q:"The defender has gone to your teammate. There's nobody between you and the goal. What should you do?",
+  players:{me:[50,26],m1:[52,44],od1:[76,38],ok:[97,32]},
+  ball:'me', view:[76,32,58],
+  intro:[{d:1500,pos:{me:[62,26],m1:[64,45],od1:[71,43]}}],
+  options:[
+    {verb:'Dribble',text:"Run at goal — nobody's in front of you",correct:true,arrow:{from:'me',to:[85,28]},
+     outcome:[{d:1100,pos:{me:[85,28],od1:[76,38],ok:[95,31]}},{d:500,ball:[101.2,34],banner:'Goal!'}],
+     why:"You don't have to pass! With nobody in front of you, run at goal and shoot."},
+    {verb:'Pass',text:'Pass to your teammate',arrow:{from:'ball',to:[64,45]},
+     outcome:[{d:700,ball:'m1'},{d:700,pos:{od1:[67,44]},banner:'Chance gone'}],
+     why:"The defender was already next to your teammate, so the pass took away your chance. You had a clear run at goal."},
+    {verb:'Stay',text:'Wait for your teammate to catch up',arrow:null,
+     outcome:[{d:1100,pos:{od1:[69,29],m1:[68,44]},banner:'Chance gone'}],
+     why:"Waiting gave the defender time to get back in front of you. When it's open, go!"}
+  ]},
+{ kind:'Drill', title:'2 v 1 defending: cover',
+  setup:"Drill: you and your partner against one attacker.",
+  q:"Your partner is closing down the only attacker. What should YOU do?",
+  players:{g:[3,32],d2:[28,46],me:[28,24],o1:[56,46]},
+  ball:'o1', view:[28,36,60],
+  intro:[{d:1500,pos:{o1:[42,46],d2:[34,46]}}],
+  options:[
+    {verb:'Stand',text:'Cover a few steps behind your partner',correct:true,arrow:{from:'me',to:[22,38]},
+     outcome:[{d:800,pos:{me:[22,38],o1:[37,46],d2:[35,46]}},{d:700,pos:{o1:[27,42],d2:[32,46],me:[24,40]}},{d:500,ball:'me',pos:{o1:[27,43]},banner:'Covered!'}],
+     why:"With only one attacker, one defender closes her down and the other covers behind. If she beats the first, the second is waiting."},
+    {verb:'Run',text:'Go and help close her down too',arrow:{from:'me',to:[37,40]},
+     outcome:[{d:800,pos:{me:[37,41],d2:[35,46],o1:[39,46]}},{d:700,pos:{o1:[30,36]}},{d:700,pos:{o1:[14,32]}},{d:500,ball:[-1,31],banner:'Goal for them'}],
+     why:"With both of you going for the ball, one clever move got past you both and there was nobody behind. Cover instead."},
+    {verb:'Stay',text:'Stay where you are',arrow:null,
+     outcome:[{d:800,pos:{o1:[37,46],d2:[35,46]}},{d:700,pos:{o1:[24,42],d2:[32,47]}},{d:700,pos:{o1:[13,36],me:[24,28]}},{d:500,ball:[-1,33],banner:'Goal for them'}],
+     why:"You were too far away to help. When she got past your partner, there was nobody covering."}
+  ]},
+{ kind:'Drill', title:'2 v 2 defending: the other attacker',
+  setup:"Drill: two attackers against you and your partner.",
+  q:"Your partner is closing down the ball. Another attacker is running forward. What should YOU do?",
+  players:{g:[3,32],d2:[30,46],me:[28,28],o1:[56,46],o2:[54,24]},
+  ball:'o1', view:[32,34,62],
+  intro:[{d:1500,pos:{o1:[43,45],d2:[37,45],o2:[39,22]}}],
+  options:[
+    {verb:'Stand',text:'Get between the other attacker and the ball',correct:true,arrow:{from:'me',to:[35,29]},
+     outcome:[{d:800,pos:{me:[35,29],o2:[36,22]}},{d:700,ball:'me',banner:'Intercepted!'}],
+     why:"With two attackers, the free one is the danger. Stay close to her, between her and the ball, so the pass can't reach her."},
+    {verb:'Stand',text:'Cover behind your partner',arrow:{from:'me',to:[24,40]},
+     outcome:[{d:800,pos:{me:[24,40],o2:[34,22]}},{d:700,ball:'o2'},{d:900,pos:{o2:[14,28]}},{d:500,ball:[-1,31],banner:'Goal for them'}],
+     why:"Covering is right when there's only one attacker. Here the second attacker was left free, and one pass put her through."},
+    {verb:'Run',text:'Go and help close down the ball',arrow:{from:'me',to:[40,40]},
+     outcome:[{d:800,pos:{me:[40,41],o2:[34,22]}},{d:700,ball:'o2'},{d:900,pos:{o2:[14,28]}},{d:500,ball:[-1,31],banner:'Goal for them'}],
+     why:"Two of you on the ball left the other attacker completely free. Mark her instead."}
+  ]}
 
 ];
 
@@ -516,7 +591,12 @@ const kOf=v=>Math.max(.62,Math.sqrt(v[2]/108));
 
 for(let i=-8;i<18;i++)$('stripes').appendChild(svgEl('rect',{x:i*10,y:-80,width:10,height:230,fill:i%2?'#2c8a44':'#29813f'}));
 
-function ballXY(b,pos){if(typeof b!=='string')return b;const k=kOf(cam);return[pos[b][0]+1.7*k,pos[b][1]+1.5*k]}
+const norm=(x,y)=>{const l=Math.hypot(x,y)||1;return[x/l,y/l]};
+/* which way a player faces when standing still: towards the goal they attack, or into the pitch if that points off it */
+function defFace(id,pos){const p=pos[id],t=team(id);let d=t==='them'||t==='ogk'?[-1,0]:[1,0];
+  const q=p[0]+d[0]*5;if(q<1||q>99||p[1]<0.5||p[1]>63.5)d=norm(50-p[0],32-p[1]);return d}
+/* the ball sits just in front of whoever has it, in the direction they are moving */
+function ballXY(b,pos){if(typeof b!=='string')return b;const d=(st.face&&st.face[b])||defFace(b,pos),r=(b==='me'?3.9:3.5)*kOf(cam);return[pos[b][0]+d[0]*r,pos[b][1]+d[1]*r]}
 function render(pos,b,v=cam){
   cam=v;const w=v[2],h=w/1.5,k=kOf(v);
   $('pitch').setAttribute('viewBox',`${v[0]-w/2} ${v[1]-h/2} ${w} ${h}`);
@@ -555,25 +635,31 @@ function play(frames,cb){
     for(const id in f.pos||{})to[id]=f.pos[id];
     const nb=f.ball!==undefined?f.ball:st.ball,b0=ballXY(st.ball,from);
     const follow=nb===st.ball&&typeof nb==='string',t0=performance.now();
+    const pickup=typeof nb==='string'&&!follow&&Math.hypot(b0[0]-from[nb][0],b0[1]-from[nb][1])<5;
+    const fc0={...(st.face||{})},nf={};
+    for(const id in to){const dx=to[id][0]-from[id][0],dy=to[id][1]-from[id][1];if(Math.hypot(dx,dy)>.4)nf[id]=norm(dx,dy)}
     const v0=[...cam],v1=f.view?fit(f.view):v0;
     const tick=now=>{
       if(my!==token)return;
       const k=Math.min(1,(now-t0)/f.d),e=ease(k),cur={};
       for(const id in to)cur[id]=lerp(from[id],to[id],e);
       cam=[v0[0]+(v1[0]-v0[0])*e,v0[1]+(v1[1]-v0[1])*e,v0[2]+(v1[2]-v0[2])*e];
-      const bt=ballXY(nb,cur);render(cur,follow?bt:lerp(b0,bt,k));
+      const fc={...fc0},w=Math.min(1,k*5);
+      for(const id in nf){const a=fc0[id]||defFace(id,from);fc[id]=norm(a[0]+(nf[id][0]-a[0])*w,a[1]+(nf[id][1]-a[1])*w)}
+      st.face=fc;
+      const bt=ballXY(nb,cur);render(cur,follow?bt:lerp(b0,bt,pickup?Math.min(1,k*4):k));
       if(k<1)requestAnimationFrame(tick);
-      else{st={pos:to,ball:nb};if(f.banner)banner(f.banner);setTimeout(next,f.banner?1100:60)}
+      else{st={pos:to,ball:nb,face:{...fc0,...nf}};if(f.banner)banner(f.banner);setTimeout(next,f.banner?1100:60)}
     };
     requestAnimationFrame(tick);
   };
   next();
 }
 function say(t){if(!speakOn)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;speechSynthesis.speak(u)}catch(e){}}
-function clone(s){return{pos:Object.fromEntries(Object.entries(s.pos).map(([k,v])=>[k,[...v]])),ball:Array.isArray(s.ball)?[...s.ball]:s.ball,cam:[...cam]}}
+function clone(s){return{pos:Object.fromEntries(Object.entries(s.pos).map(([k,v])=>[k,[...v]])),ball:Array.isArray(s.ball)?[...s.ball]:s.ball,cam:[...cam],face:{...(s.face||{})}}}
 
 function drawArrows(){
-  const a=$('arrows'),k=kOf(cam);a.innerHTML='';
+  const a=$('arrows'),k=kOf(cam);a.innerHTML='';$('badges').innerHTML='';
   if(S.lane){const p=S.lane.map(id=>id==='ball'?ballXY(st.ball,st.pos):st.pos[id]);
     a.appendChild(svgEl('line',{x1:p[0][0],y1:p[0][1],x2:p[1][0],y2:p[1][1],stroke:'#fff','stroke-opacity':.32,'stroke-width':3.4*k,'stroke-linecap':'round'}))}
   order.forEach((oi,n)=>{
@@ -581,11 +667,13 @@ function drawArrows(){
     if(o.arrow){
       const from=o.arrow.from==='ball'?ballXY(st.ball,st.pos):st.pos.me,to=o.arrow.to;
       a.appendChild(svgEl('line',{x1:from[0],y1:from[1],x2:to[0],y2:to[1],stroke:'#ffd23f','stroke-width':.7*k,'stroke-dasharray':`${1.6*k} ${1.2*k}`,'marker-end':'url(#ah)'}));
-      end=to;
-    }else end=[st.pos.me[0]-7.5*k,st.pos.me[1]+3.2*k];
-    const b=svgEl('g',{transform:`translate(${end[0]} ${end[1]-3.2*k}) scale(${k})`});
+      /* letter sits partway along the arrow, clear of the player at either end */
+      const len=Math.hypot(to[0]-from[0],to[1]-from[1])||1,t=Math.max(.68*len,Math.min(len+3*k,7*k))/len;
+      end=[from[0]+(to[0]-from[0])*t,from[1]+(to[1]-from[1])*t];
+    }else end=[st.pos.me[0]-7.5*k,st.pos.me[1]];
+    const b=svgEl('g',{transform:`translate(${end[0]} ${end[1]}) scale(${k})`});
     b.appendChild(svgEl('circle',{r:2.4,fill:'#ffd23f',stroke:'#10241a','stroke-width':.3}));
-    const t=svgEl('text',{y:1.1,'text-anchor':'middle','font-size':3.2,'font-weight':700,fill:'#3b2a00','font-family':'Fredoka,sans-serif'});t.textContent=L;b.appendChild(t);a.appendChild(b);
+    const t=svgEl('text',{y:1.1,'text-anchor':'middle','font-size':3.2,'font-weight':700,fill:'#3b2a00','font-family':'Fredoka,sans-serif'});t.textContent=L;b.appendChild(t);$('badges').appendChild(b);
   });
 }
 /* flip a scenario top-to-bottom so the same idea comes up on the other wing */
@@ -601,7 +689,7 @@ function newRound(){
 }
 function dots(){$('dots').innerHTML=round.map((_,i)=>`<b class="${stars[i]===true?'star':stars[i]===false?'tried':''}${i===idx?' now':''}" title="Question ${i+1}"></b>`).join('')}
 function header(){
-  $('tag').textContent=S.kind;$('tag').className='tag '+({Defending:'def',Attacking:'',Positioning:'pos'}[S.kind]??'set');
+  $('tag').textContent=S.kind;$('tag').className='tag '+({Defending:'def',Attacking:'',Positioning:'pos',Drill:'drill'}[S.kind]??'set');
   $('count').textContent=`Question ${idx+1} of ${round.length} · ${S.title}`;dots();
 }
 function load(i){
@@ -611,9 +699,9 @@ function load(i){
 }
 function watch(){
   token++;$('banner').className='banner';
-  st={pos:Object.fromEntries(Object.entries(S.players).map(([k,v])=>[k,[...v]])),ball:S.ball};
+  st={pos:Object.fromEntries(Object.entries(S.players).map(([k,v])=>[k,[...v]])),ball:S.ball,face:{}};
   cam=[...FULL];render(st.pos,ballXY(st.ball,st.pos));
-  $('arrows').innerHTML='';$('fb').hidden=true;
+  $('arrows').innerHTML='';$('badges').innerHTML='';$('fb').hidden=true;
   $('q').textContent=S.setup;$('opts').hidden=false;$('opts').innerHTML='<p class="watch">Watch the pitch…</p>';say(S.setup);
   const my=token;setTimeout(()=>{if(my===token)play([{d:1100,view:S.view||FULL},...S.intro],ask)},700);
 }
@@ -626,7 +714,7 @@ function choose(oi){
   const o=S.options[oi];tries++;
   if(stars[idx]===undefined)stars[idx]=!!o.correct;
   document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(+b.dataset.o===oi)b.classList.add('picked')});
-  $('arrows').innerHTML='';tone=o.correct?'good':'bad';
+  $('arrows').innerHTML='';$('badges').innerHTML='';tone=o.correct?'good':'bad';
   play(o.outcome,()=>feedback(o));
 }
 function feedback(o){
@@ -641,8 +729,8 @@ function feedback(o){
 }
 function retry(){$('banner').className='banner';st=clone(frozen);cam=st.cam;render(st.pos,ballXY(st.ball,st.pos));ask()}
 function finish(){
-  const n=stars.filter(x=>x===true).length;token++;$('arrows').innerHTML='';dots();
-  st={pos:st.pos,ball:st.ball};play([{d:1000,view:FULL}]);
+  const n=stars.filter(x=>x===true).length;token++;$('arrows').innerHTML='';$('badges').innerHTML='';dots();
+  st={pos:st.pos,ball:st.ball,face:st.face};play([{d:1000,view:FULL}]);
   $('tag').textContent='Full time';$('tag').className='tag def';$('count').textContent='';
   $('q').textContent=`You got ${n} out of ${round.length} right first time!`;
   $('opts').innerHTML='';const fb=$('fb');fb.hidden=false;fb.className='fb good';
